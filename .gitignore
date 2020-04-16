@@ -1,0 +1,34 @@
+# CVS default ignores begin
+src/tags
+src/TAGS
+src/.make.state
+src/.nse_depinfo
+src/*.mod
+src/*~
+src/\#*
+src/.#*
+src/,*
+src/_$*
+src/*$
+src/*.old
+src/*.bak
+src/*.BAK
+src/*.orig
+src/*.rej
+src/.del-*
+src/*.a
+src/*.olb
+src/*.o
+src/*.obj
+src/*.so
+src/*.exe
+src/*.Z
+src/*.elc
+src/*.ln
+src/core
+bin/2D3C*
+
+# Added by Santi
+test_run/
+# CVS default ignores end
+
