@@ -921,11 +921,13 @@
 
 
 !*****************************************************************
-      SUBROUTINE const_inj(ps,kdn,kup,fp0,fp,seed1)
+      SUBROUTINE const_inj(ps,kdn,kup,fp0,fp,kin,seed1)
 !-----------------------------------------------------------------
 !       This subroutine assures that we inject constant energy.
 !       It is called when iflow == 2
-!   
+!       kin == 0 for vx
+!           == 1 for ps
+
       USE mpivars
       USE kes
       USE ali
@@ -936,7 +938,7 @@
       IMPLICIT NONE
 !                                               ps
       DOUBLE COMPLEX, DIMENSION(n,ista:iend) :: ps,fp
-      INTEGER :: i,j,seed1
+      INTEGER :: i,j,seed1,kin
       DOUBLE PRECISION        :: tmp,kdn,kup,Efp,fp0
       DOUBLE PRECISION        :: tmp1,tmp2,tmp3,two,phase2d
 
@@ -972,7 +974,7 @@
          ENDIF
       END DO
         
-      CALL inerprod(ps,fp,1,Efp) 
+      CALL inerprod(ps,fp,kin,Efp) ! Finds the dot product: either |nabla psi \nabla fpsi| or |vx fv| 
 !!!!!Rescaling of forcing!!!
       seed1=myrank
       DO i = ista,iend
@@ -1001,17 +1003,16 @@
          ENDIF
       END DO
       
-      CALL inerprod(ps,fp,1,tmp1)
-
       RETURN
       END SUBROUTINE const_inj
 
 !*****************************************************************
-      SUBROUTINE rand_force(kdn,kup,fp0,dt,seed,fp)
+      SUBROUTINE rand_force(kdn,kup,fp0,dt,seed,kin,fp)
 !-----------------------------------------------------------------
 !       This subroutine creates random forcing.
 !       It is called when iflow == 3.
-!   
+!       kin == 0   for vx   
+!           == 1   for ps
       USE var
       USE mpivars
       USE kes
@@ -1022,7 +1023,7 @@
         IMPLICIT NONE
 !                                              
       DOUBLE COMPLEX, DIMENSION(n,ista:iend) ::fp
-      INTEGER :: i,j,seed
+      INTEGER :: i,j,seed,kin
       DOUBLE PRECISION        :: tmp,kdn,kup,fp0,energyfp,energyfp2
       DOUBLE PRECISION        :: dt,tmp1,tmp2,two,phase,kx,ky,theta
 
