@@ -31,9 +31,9 @@
 
 
       DOUBLE COMPLEX, ALLOCATABLE, DIMENSION (:,:) :: ps   ! 2D streamfunction
-      DOUBLE COMPLEX, ALLOCATABLE, DIMENSION (:,:) :: vx   ! v_x 
+      DOUBLE COMPLEX, ALLOCATABLE, DIMENSION (:,:) :: vz   ! v_x 
       DOUBLE COMPLEX, ALLOCATABLE, DIMENSION (:,:) :: fp
-      DOUBLE COMPLEX, ALLOCATABLE, DIMENSION (:,:) :: fv
+      DOUBLE COMPLEX, ALLOCATABLE, DIMENSION (:,:) :: fz
  
 !
 ! Temporal data storing matrixes
@@ -60,7 +60,7 @@
       DOUBLE PRECISION :: dump,tmp
       DOUBLE PRECISION :: tmp1,tmp2,tmp3,tmp4,tmp5
       DOUBLE PRECISION :: fp0,u0
-      DOUBLE PRECISION :: fv0,v0
+      DOUBLE PRECISION :: fz0,v0
       DOUBLE PRECISION :: time,ro
       DOUBLE PRECISION :: nu,hnu
       DOUBLE PRECISION :: nuv,hnuv
@@ -112,9 +112,9 @@
       ALLOCATE( C5(n,ista:iend) )
       ALLOCATE( C6(n,ista:iend) )
       ALLOCATE( ps(n,ista:iend) )
-      ALLOCATE( vx(n,ista:iend) )
+      ALLOCATE( vz(n,ista:iend) )
       ALLOCATE( fp(n,ista:iend) )
-      ALLOCATE( fv(n,ista:iend) )
+      ALLOCATE( fz(n,ista:iend) )
       ALLOCATE( ka(n), ka2(n,ista:iend) )
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -140,7 +140,7 @@
          READ(1,*) sstep                    ! 4
          READ(1,*) tstep                    ! 5
          READ(1,*) fp0                      ! 6
-         READ(1,*) fv0                      ! 7
+         READ(1,*) fz0                      ! 7
          READ(1,*) u0                       ! 8
          READ(1,*) v0                       ! 9
          READ(1,*) kdn                      ! 10
@@ -173,7 +173,7 @@
       CALL MPI_BCAST(sstep,1,MPI_INTEGER,         0,MPI_COMM_WORLD,ierr) ! 4
       CALL MPI_BCAST(tstep,1,MPI_INTEGER,         0,MPI_COMM_WORLD,ierr) ! 5
       CALL MPI_BCAST(  fp0,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr) ! 6
-      CALL MPI_BCAST(  fv0,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr) ! 7
+      CALL MPI_BCAST(  fz0,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr) ! 7
       CALL MPI_BCAST(   u0,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr) ! 8
       CALL MPI_BCAST(   v0,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr) ! 9
       CALL MPI_BCAST(  kdn,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr) ! 10
@@ -273,15 +273,15 @@
                        * cos(2.0d0*(jr-1)*pi*(dble(j)-1)/dble(n)+phase2)/kr
                R2(i,j) = R2(i,j) &
                        + sin(2.0d0*(ir-1)*pi*(dble(i)-1)/dble(n)+phase3) &
-                       * cos(2.0d0*(jr-1)*pi*(dble(j)-1)/dble(n)+phase4)    ! No kr because we're forcing vx
+                       * cos(2.0d0*(jr-1)*pi*(dble(j)-1)/dble(n)+phase4)    ! No kr because we're forcing vz
             END DO
          END DO
          END DO
          END DO
          CALL fftp2d_real_to_complex(planrc,R1,ps,MPI_COMM_WORLD)
-         CALL fftp2d_real_to_complex(planrc,R2,vx,MPI_COMM_WORLD)
+         CALL fftp2d_real_to_complex(planrc,R2,vz,MPI_COMM_WORLD)
          CALL energy(ps,ener,1)
-         CALL energy(vx,enerv,0)
+         CALL energy(vz,enerv,0)
          CALL MPI_BCAST(ener,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr) 
          CALL MPI_BCAST(enerv,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr) 
          tmp=u0/sqrt(ener)
@@ -290,10 +290,10 @@
             DO j = 1,n
                IF ((ka2(j,i).le.kmax).and.(ka2(j,i).ge.tiny)) THEN
                   ps(j,i) = tmp*ps(j,i)
-                  vx(j,i) = tmp1*vx(j,i)
+                  vz(j,i) = tmp1*vz(j,i)
                ELSE
                   ps(j,i) = 0.0d0
-                  vx(j,i) = 0.0d0
+                  vz(j,i) = 0.0d0
                ENDIF
             END DO
          END DO
@@ -324,10 +324,10 @@
                            // c // d // u //'.out',form='unformatted')
          READ(1) R1
          CALL fftp2d_real_to_complex(planrc,R1,ps,MPI_COMM_WORLD)
-         OPEN(1,file=trim(idir) // '/vx.' // node // '.' &
+         OPEN(1,file=trim(idir) // '/vz.' // node // '.' &
                            // c // d // u //'.out',form='unformatted')
          READ(1) R2
-         CALL fftp2d_real_to_complex(planrc,R2,vx,MPI_COMM_WORLD)
+         CALL fftp2d_real_to_complex(planrc,R2,vz,MPI_COMM_WORLD)
 
 !        CALL energy(ps,ener,1)
 !        CALL energy(phi,enerphi,0)
@@ -355,29 +355,29 @@
          CALL energy(fp,eneru,1)
          CALL MPI_BCAST(eneru,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr) 
          tmp=fp0/sqrt(eneru)
-         CALL fftp2d_real_to_complex(planrc,R2,fv,MPI_COMM_WORLD)
-         CALL energy(fv,enerv,0)
+         CALL fftp2d_real_to_complex(planrc,R2,fz,MPI_COMM_WORLD)
+         CALL energy(fz,enerv,0)
          CALL MPI_BCAST(enerv,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
-         tmp1=fv0/sqrt(enerv)
+         tmp1=fz0/sqrt(enerv)
          DO i = ista,iend
             DO j = 1,n
                IF ((ka2(j,i).le.kmax).and.(ka2(j,i).ge.tiny)) THEN
                   fp(j,i) = tmp*fp(j,i)
-                  fv(j,i) = tmp1*fv(j,i)
+                  fz(j,i) = tmp1*fz(j,i)
                ELSE
                   fp(j,i) = 0.0d0
-                  fv(j,i) = 0.0d0
+                  fz(j,i) = 0.0d0
                ENDIF
             END DO
          END DO
          ELSEIF (iflow.eq.2) THEN
          seed1 = seed+1
          CALL const_inj(ps,kdn,kup,fp0,fp,1,seed1)
-         CALL const_inj(vx,kdn,kup,fv0,fv,0,seed)  
+         CALL const_inj(vz,kdn,kup,fz0,fz,0,seed)  
          ELSEIF (iflow.eq.3) THEN
          CALL CFL_condition(CFL,ps,phi,cphi,dphi,nu,dt,nn)
          CALL rand_force(kdn,kup,fp0,dt,seed,1,fp)
-         CALL rand_force(kdn,kup,fv0,dt,seed1,0,fv)
+         CALL rand_force(kdn,kup,fz0,dt,seed1,0,fz)
          ENDIF ! iflow
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !         CALL energy(ps,ener,1)
@@ -612,9 +612,9 @@
       DEALLOCATE( R1 )
       DEALLOCATE( R2 )
       DEALLOCATE( ps )
-      DEALLOCATE( vx )
+      DEALLOCATE( vz )
       DEALLOCATE( fp )
-      DEALLOCATE( fv )
+      DEALLOCATE( fz )
       DEALLOCATE( C1 )
       DEALLOCATE( C2 )
       DEALLOCATE( C3 )
