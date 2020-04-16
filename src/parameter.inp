@@ -1,0 +1,25 @@
+  0.5d0               % 1  dt
+  500000000           % 2  step
+  100                 % 3  cstep, balance files
+  1000 %10000         % 4  sstep, spectra files
+  10000 %200000       % 5  tstep, flow field files
+  1.00d0              % 6  fp0, streamfunction forcing amplitude (if iflow =2, then energy injection)
+  0.010d0             % 7  u0, streamfunction ic amplitude
+  0.010d0             % 8  phi0, field ic amplitude
+  8.0d0               % 9 kdn, lowest forced wavenumber
+  8.0d0               % 10 kup, forcing wavenumber
+  0.000750d0          % 11 nu 0.001 for 256
+  1.00000d0           % 12 hnu 0.5 (hypo visc)
+  1                   % 13 nn, order of dissipation
+  2                   % 14 mm, order of hypo-dissipation
+  0.010	 	      % 15 mu, order parameter for field phi
+  1.0d0	 	      % 16 cphi, -cphi*phi^3
+  0.00075d0	      % 17 dphi, dphi*nabla^2 phi
+  1                   % 18 seed
+  3                   % 19 iflow (1 = random phase, 2 = const inj, 3 = random forcing)
+  1.000d0             % 20 prm1
+  1.000d0             % 21 prm2
+  0.0000d0            % 22 dt_corr
+  1.0d0              % 23 fphi -- factor in front of omega*phi term. 
+../ins
+../outs
