@@ -61,7 +61,7 @@
       DOUBLE PRECISION :: tmp1,tmp2,tmp3,tmp4,tmp5
       DOUBLE PRECISION :: fp0,u0
       DOUBLE PRECISION :: fz0,v0
-      DOUBLE PRECISION :: time,ro
+      DOUBLE PRECISION :: time,omega
       DOUBLE PRECISION :: nu,hnu
       DOUBLE PRECISION :: nuv,hnuv
       DOUBLE PRECISION :: phase1,phase2
@@ -153,7 +153,7 @@
          READ(1,*) hnuv                     ! 17
          READ(1,*) nnv                      ! 18
          READ(1,*) mmv                      ! 19
-         READ(1,*) ro                       ! 20
+         READ(1,*) omega                    ! 20
          READ(1,*) seed                     ! 21
          READ(1,*) iflow                    ! 22
          READ(1,*) prm1                     ! 23
@@ -186,7 +186,7 @@
       CALL MPI_BCAST( hnuv,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr) ! 17
       CALL MPI_BCAST(  nnv,1,MPI_INTEGER,         0,MPI_COMM_WORLD,ierr) ! 18
       CALL MPI_BCAST(  mmv,1,MPI_INTEGER,         0,MPI_COMM_WORLD,ierr) ! 19
-      CALL MPI_BCAST(   ro,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr) ! 20
+      CALL MPI_BCAST(omega,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr) ! 20
       CALL MPI_BCAST( seed,1,MPI_INTEGER,         0,MPI_COMM_WORLD,ierr) ! 21
       CALL MPI_BCAST(iflow,1,MPI_INTEGER,         0,MPI_COMM_WORLD,ierr) ! 22
       CALL MPI_BCAST( prm1,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr) ! 23
