@@ -785,13 +785,11 @@
       END SUBROUTINE transfers
 
 !*****************************************************************
-      SUBROUTINE CFL_condition(cfl,ps,phi,cphi,dphi,nu,dt,nn)
+      SUBROUTINE CFL_condition(cfl,ps,vz,nu,nn,nuv,nnv,omega,dt)
 !-----------------------------------------------------------------
 !        Parameters
 !     cfl :cfl factor
-!      c1 : stream fun
-!      c2 : vector pot
-!      b0 : external 
+
       USE mpivars
       USE kes
       USE ali
@@ -799,16 +797,17 @@
       USE fft
       IMPLICIT NONE
       DOUBLE COMPLEX, DIMENSION(n,ista:iend) :: ps
-      DOUBLE COMPLEX, DIMENSION(n,ista:iend) :: phi
+      DOUBLE COMPLEX, DIMENSION(n,ista:iend) :: vz
       DOUBLE COMPLEX, DIMENSION(n,ista:iend) :: c1,c2,c3
       DOUBLE PRECISION, DIMENSION(n,jsta:jend)    :: r1,r2,r3
-      INTEGER :: i,j,nn
-      DOUBLE PRECISION        :: tmp,dt,nu,cfl,cphi,dphi,mu
-      DOUBLE PRECISION        :: tmp1,tmp2,kcut,nrm,maxphi
+      INTEGER :: i,j,nn,nnv
+      DOUBLE PRECISION        :: tmp,dt,nu,nuv,omega
+      DOUBLE PRECISION        :: tmp1,tmp2,kcut,nrm,maxv
 
       kcut=(dble(n)/3.0d0)
        nrm=(dble(n))**2
- 
+
+!!!!! FINDING MAX(|nabla psi|) 
       CALL derivk2(ps,c1,1)
       CALL derivk2(ps,c2,2)    
       CALL fftp2d_complex_to_real(plancr,c1,r1,MPI_COMM_WORLD)
@@ -824,22 +823,24 @@
       call MPI_REDUCE(tmp,tmp1,1,MPI_DOUBLE_PRECISION,MPI_MAX,0,MPI_COMM_WORLD,ierr)
       call MPI_BCAST(tmp1,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
         
- 
-      CALL derivk2(phi,c3,0) 
+!!!!! FINDING MAX(VX)
+      CALL derivk2(vz,c3,0) 
       CALL fftp2d_complex_to_real(plancr,c3,r1,MPI_COMM_WORLD)
       DO j = jsta,jend
          DO i = 1,n
             r2(i,j) = r1(i,j)*r1(i,j)
          END DO
       END DO
-      tmp2 = maxval(r2) !max phi^2
-      call MPI_REDUCE(tmp2,maxphi,1,MPI_DOUBLE_PRECISION,MPI_MAX,0,MPI_COMM_WORLD,ierr)
-      call MPI_BCAST(maxphi,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
+      tmp2 = maxval(r2) !max vz^2
+      call MPI_REDUCE(tmp2,maxv,1,MPI_DOUBLE_PRECISION,MPI_MAX,0,MPI_COMM_WORLD,ierr)
+      call MPI_BCAST(maxv,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
+
+!!!!!
 
       kcut=(dble(n)/3.0d0)
-      tmp=sqrt(tmp1)/nrm
-      tmp2 = sqrt(maxphi)/nrm
-      dt = cfl/(kcut*tmp+nu*(kcut**(2*nn))+dphi*(kcut**2)+cphi*tmp2**2 + mu)
+      tmp=sqrt(tmp1)/nrm  ! max horizontal velocity 
+      tmp2 = sqrt(maxv)/nrm ! max vertical velocity
+      dt = cfl/(kcut*tmp+nu*(kcut**(2*nn))+nuv*(kcut**(2*nnv))+2*omega)
 
  
       RETURN
@@ -925,7 +926,7 @@
 !-----------------------------------------------------------------
 !       This subroutine assures that we inject constant energy.
 !       It is called when iflow == 2
-!       kin == 0 for vx
+!       kin == 0 for vz
 !           == 1 for ps
 
       USE mpivars
@@ -974,7 +975,7 @@
          ENDIF
       END DO
         
-      CALL inerprod(ps,fp,kin,Efp) ! Finds the dot product: either |nabla psi \nabla fpsi| or |vx fv| 
+      CALL inerprod(ps,fp,kin,Efp) ! Finds the dot product: either |nabla psi \nabla fpsi| or |vz fz| 
 !!!!!Rescaling of forcing!!!
       seed1=myrank
       DO i = ista,iend
@@ -1011,7 +1012,7 @@
 !-----------------------------------------------------------------
 !       This subroutine creates random forcing.
 !       It is called when iflow == 3.
-!       kin == 0   for vx   
+!       kin == 0   for vz   
 !           == 1   for ps
       USE var
       USE mpivars
@@ -1041,7 +1042,7 @@
          CALL MPI_BCAST(kx,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
          CALL MPI_BCAST(ky,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
          CALL MPI_BCAST(phase,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
-         tmp = sqrt(2.0d0*fp0)/(sqrt(dt)*kup**kin) ! kup**kin to distinguish between vx and ps
+         tmp = sqrt(2.0d0*fp0)/(sqrt(dt)*kup**kin) ! kup**kin to distinguish between vz and ps
          tmp1 = tmp*cos(phase)
          tmp2 = tmp*sin(phase)
       DO i = ista,iend
