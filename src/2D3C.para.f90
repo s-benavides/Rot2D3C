@@ -33,6 +33,7 @@
       DOUBLE COMPLEX, ALLOCATABLE, DIMENSION (:,:) :: ps
       DOUBLE COMPLEX, ALLOCATABLE, DIMENSION (:,:) :: phi
       DOUBLE COMPLEX, ALLOCATABLE, DIMENSION (:,:) :: fp
+      DOUBLE COMPLEX, ALLOCATABLE, DIMENSION (:,:) :: fphi
  
 !
 ! Temporal data storing matrixes
@@ -113,6 +114,7 @@
       ALLOCATE( ps(n,ista:iend) )
       ALLOCATE( phi(n,ista:iend) )
       ALLOCATE( fp(n,ista:iend) )
+      ALLOCATE( fphi(n,ista:iend) )
       ALLOCATE( ka(n), ka2(n,ista:iend) )
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -138,23 +140,25 @@
          READ(1,*) sstep                    ! 4
          READ(1,*) tstep                    ! 5
          READ(1,*) fp0                      ! 6
-         READ(1,*) u0                       ! 7
-         READ(1,*) phi0                     ! 8
-         READ(1,*) kdn                      ! 9
-         READ(1,*) kup                      ! 10
-         READ(1,*) nu                       ! 11
-         READ(1,*) hnu                      ! 12
-         READ(1,*) nn                       ! 13
-         READ(1,*) mm                       ! 14
-         READ(1,*) mu                       ! 15
-         READ(1,*) cphi                     ! 16
-         READ(1,*) dphi                     ! 17
-         READ(1,*) seed                     ! 18
-         READ(1,*) iflow                    ! 19
-         READ(1,*) prm1                     ! 20
-         READ(1,*) prm2                     ! 21
-         READ(1,*) dt_corr                  ! 22 
-         READ(1,*) fphi                     ! 23
+         READ(1,*) fphi                     ! 7
+         READ(1,*) u0                       ! 8
+         READ(1,*) phi0                     ! 9
+         READ(1,*) kdn                      ! 10
+         READ(1,*) kup                      ! 11
+         READ(1,*) nu                       ! 12
+         READ(1,*) hnu                      ! 13
+         READ(1,*) nn                       ! 14
+         READ(1,*) mm                       ! 15
+         READ(1,*) nuphi                    ! 16
+         READ(1,*) hnuphi                   ! 17
+         READ(1,*) nnphi                    ! 18
+         READ(1,*) mmphi                    ! 19
+         READ(1,*) ro                       ! 20
+         READ(1,*) seed                     ! 21
+         READ(1,*) iflow                    ! 22
+         READ(1,*) prm1                     ! 23
+         READ(1,*) prm2                     ! 24
+         READ(1,*) dt_corr                  ! 25 
          READ(1,'(a100)') idir              ! binary input directory
          READ(1,'(a100)') odir              ! output directory
          CLOSE(1)
@@ -169,23 +173,25 @@
       CALL MPI_BCAST(sstep,1,MPI_INTEGER,         0,MPI_COMM_WORLD,ierr) ! 4
       CALL MPI_BCAST(tstep,1,MPI_INTEGER,         0,MPI_COMM_WORLD,ierr) ! 5
       CALL MPI_BCAST(  fp0,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr) ! 6
-      CALL MPI_BCAST(   u0,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr) ! 7
-      CALL MPI_BCAST( phi0,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr) ! 8
-      CALL MPI_BCAST(  kdn,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr) ! 9
-      CALL MPI_BCAST(  kup,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr) ! 10
-      CALL MPI_BCAST(   nu,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr) ! 11
-      CALL MPI_BCAST(  hnu,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr) ! 12
-      CALL MPI_BCAST(   nn,1,MPI_INTEGER,         0,MPI_COMM_WORLD,ierr) ! 13
-      CALL MPI_BCAST(   mm,1,MPI_INTEGER,         0,MPI_COMM_WORLD,ierr) ! 14
-      CALL MPI_BCAST(   mu,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr) ! 15
-      CALL MPI_BCAST( cphi,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr) ! 16
-      CALL MPI_BCAST( dphi,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr) ! 17
-      CALL MPI_BCAST( seed,1,MPI_INTEGER,         0,MPI_COMM_WORLD,ierr) ! 18
-      CALL MPI_BCAST(iflow,1,MPI_INTEGER,         0,MPI_COMM_WORLD,ierr) ! 19
-      CALL MPI_BCAST( prm1,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr) ! 20
-      CALL MPI_BCAST( prm2,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr) ! 21
-      CALL MPI_BCAST( dt_corr,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr) !22
-      CALL MPI_BCAST( fphi,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr) !23
+      CALL MPI_BCAST(fphi0,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr) ! 7
+      CALL MPI_BCAST(   u0,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr) ! 8
+      CALL MPI_BCAST( phi0,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr) ! 9
+      CALL MPI_BCAST(  kdn,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr) ! 10
+      CALL MPI_BCAST(  kup,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr) ! 11
+      CALL MPI_BCAST(   nu,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr) ! 12
+      CALL MPI_BCAST(  hnu,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr) ! 13
+      CALL MPI_BCAST(   nn,1,MPI_INTEGER,         0,MPI_COMM_WORLD,ierr) ! 14
+      CALL MPI_BCAST(   mm,1,MPI_INTEGER,         0,MPI_COMM_WORLD,ierr) ! 15
+      CALL MPI_BCAST(nuphi,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr) ! 16
+      CALL MPI_BCAST(nuphi,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr) ! 17
+      CALL MPI_BCAST(nnphi,1,MPI_INTEGER,         0,MPI_COMM_WORLD,ierr) ! 18
+      CALL MPI_BCAST(mmphi,1,MPI_INTEGER,         0,MPI_COMM_WORLD,ierr) ! 19
+      CALL MPI_BCAST(   ro,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr) ! 20
+      CALL MPI_BCAST( seed,1,MPI_INTEGER,         0,MPI_COMM_WORLD,ierr) ! 21
+      CALL MPI_BCAST(iflow,1,MPI_INTEGER,         0,MPI_COMM_WORLD,ierr) ! 22
+      CALL MPI_BCAST( prm1,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr) ! 23
+      CALL MPI_BCAST( prm2,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr) ! 24
+      CALL MPI_BCAST(dt_corr,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr) !25
       CALL MPI_BCAST(idir,100,MPI_CHARACTER,0,MPI_COMM_WORLD,ierr)
       CALL MPI_BCAST(odir,100,MPI_CHARACTER,0,MPI_COMM_WORLD,ierr)
 
@@ -323,11 +329,11 @@
          READ(1) R2
          CALL fftp2d_real_to_complex(planrc,R2,phi,MPI_COMM_WORLD)
 
-        CALL energy(ps,ener,1)
-        CALL energy(phi,enerphi,0)
-          IF (myrank.eq.0) THEN
-           print*, "DBG pre RK:",ener,enerphi
-          ENDIF
+!        CALL energy(ps,ener,1)
+!        CALL energy(phi,enerphi,0)
+!          IF (myrank.eq.0) THEN
+!           print*, "DBG:",ener,enerphi
+!          ENDIF
 !
 
       ENDIF ! stat
@@ -341,27 +347,37 @@
             DO i = 1,n
                R1(i,j) = sin(2*kup*pi*(dble(i)-1)/dble(n)) &
                        + sin(2*kup*pi*(dble(j)-1)/dble(n))
+               R2(i,j) = cos(2*kup*pi*(dble(i)-1)/dble(n)) &
+                       + cos(2*kup*pi*(dble(j)-1)/dble(n))
             END DO
          END DO
          CALL fftp2d_real_to_complex(planrc,R1,fp,MPI_COMM_WORLD)
          CALL energy(fp,eneru,1)
          CALL MPI_BCAST(eneru,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr) 
          tmp=fp0/sqrt(eneru)
+         CALL fftp2d_real_to_complex(planrc,R2,fphi,MPI_COMM_WORLD)
+         CALL energy(fphi,eneru,1)
+         CALL MPI_BCAST(eneru,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
+         tmp1=fphi0/sqrt(eneru)
          DO i = ista,iend
             DO j = 1,n
                IF ((ka2(j,i).le.kmax).and.(ka2(j,i).ge.tiny)) THEN
                   fp(j,i) = tmp*fp(j,i)
+                  fphi(j,i) = tmp1*fphi(j,i)
                ELSE
                   fp(j,i) = 0.0d0
+                  fphi(j,i) = 0.0d0
                ENDIF
             END DO
          END DO
          ELSEIF (iflow.eq.2) THEN
          seed1 = seed+1
          CALL const_inj(ps,kdn,kup,fp0,fp,seed1)
+         CALL const_inj(phi,kdn,kup,fphi0,fphi,seed)
          ELSEIF (iflow.eq.3) THEN
          CALL CFL_condition(CFL,ps,phi,cphi,dphi,nu,dt,nn)
          CALL rand_force(kdn,kup,fp0,dt,seed,fp)
+         CALL rand_force(kdn,kup,fphi0,dt,seed1,fphi)
          ENDIF ! iflow
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !         CALL energy(ps,ener,1)
@@ -597,6 +613,8 @@
       DEALLOCATE( R2 )
       DEALLOCATE( ps )
       DEALLOCATE( phi )
+      DEALLOCATE( fp )
+      DEALLOCATE( fphi )
       DEALLOCATE( C1 )
       DEALLOCATE( C2 )
       DEALLOCATE( C3 )
