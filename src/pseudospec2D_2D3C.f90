@@ -1041,7 +1041,7 @@
          CALL MPI_BCAST(kx,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
          CALL MPI_BCAST(ky,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
          CALL MPI_BCAST(phase,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
-         tmp = sqrt(2.0d0*fp0)/(sqrt(dt)*kup)
+         tmp = sqrt(2.0d0*fp0)/(sqrt(dt)*kup**kin) ! kup**kin to distinguish between vx and ps
          tmp1 = tmp*cos(phase)
          tmp2 = tmp*sin(phase)
       DO i = ista,iend
