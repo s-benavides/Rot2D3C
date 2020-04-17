@@ -792,7 +792,8 @@
       IF (myrank.eq.0) THEN
          fx0=0.0d0 
          fx1=0.0d0
-         OPEN(1,file=trim(odir) // '/transfer.' // ext // '.txt')
+         fx2=0.0d0 
+        OPEN(1,file=trim(odir) // '/transfer.' // ext // '.txt')
          do i=1,n/2+1
          WRITE(1,40) Fl0(i), Fl1(i), Fl2(i)
          enddo
