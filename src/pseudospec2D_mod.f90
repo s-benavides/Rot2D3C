@@ -8,7 +8,7 @@
 !
 ! n: number of points in the spatial grid
 ! choose: 128   256  512  1024  2048  4096  8192  16384
-      INTEGER :: n = 256
+      INTEGER :: n = 512
       SAVE
 
   END MODULE grid
