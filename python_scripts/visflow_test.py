@@ -22,7 +22,7 @@ reso = 512 #input('Resolution of simulation? (512, 1024, etc.): ')
 #Ktemp = raw_input('Enter K: ')
 #qname = raw_input('Enter Q: ')
 #outtype = raw_input('Enter flow file (vx, vy, vz, ps, ww): ')
-otypes = ['ww','phi']
+otypes = ['ww','vz']
 datbars = dict([])
 for otype in otypes:
 	data =[]
@@ -32,7 +32,7 @@ for otype in otypes:
 	#print(shape(data1))
 	out = np.reshape(data,(reso,reso)) #Finally reshapes into a reso x reso array.
 	
-	out = abs(out)
+	#out = abs(out)
 
 	omax = np.max(out)
 	omin = np.min(out)

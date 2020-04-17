@@ -16,22 +16,20 @@ path = '../'+runname+'/run/'
 
 params = np.genfromtxt(path+'parameter.inp',comments='%',converters={0:  lambda val: float(val.translate(rule))},usecols=0)
 
-rand = params[18]
+rand = params[21]
 
 sstep = params[3]
 
 cstep = params[2]
 
 # Reads balance.txt
-t,en,inj,den,hen = np.loadtxt(path+'u_bal.txt',unpack=True)
-t1,enphi,denphi,nlphi1,nlphi2 = np.loadtxt(path+'phi_bal.txt',unpack=True)
-t2,efk,e1,e2 = np.loadtxt(path+'misc.txt',unpack=True)
+t,en,enz,inj,injz,diss,dissz,hdiss,hdissz,coup,uf,ufz = np.loadtxt(path+'energy_bal.txt',unpack=True)
 
 if rand==3:
 	inj = inj/2. # RANDOM FORCING
 
 # Averaging injection
-injtot = np.mean(inj)
+injtot = np.mean(inj) + np.mean(injz)
 
 # nu,kf
 nu = float(params[10])
