@@ -31,27 +31,26 @@ for i in range(num):
         folder = raw_input("Folder name: ")
         runnames.append(folder)
 
-mus = dict([])
+omegas = dict([])
 # For making colorbar
 for jj,runname in enumerate(runnames):
   	path = '../'+runname+'/run/'
-	mu = np.genfromtxt(path+'parameter.inp',comments='%',converters={0:  lambda val: float(val.translate(rule))},usecols=0)[14]
-	mu = mu+1
-	mu_c = 0.75
-	mus[runname]=mu/mu_c
+	omega = np.genfromtxt(path+'parameter.inp',comments='%',converters={0:  lambda val: float(val.translate(rule))},usecols=0)[19]
+	omegas[runname]=omega
 
 for jj,runname in enumerate(runnames):
   	path = '../'+runname+'/run/'
 
 	params = np.genfromtxt(path+'parameter.inp',comments='%',converters={0:  lambda val: float(val.translate(rule))},usecols=0)
 
-	rand= params[18]
+	rand= params[21]
 	print('rand = ',rand)
 
 	# Reads balance.txt
 	t,en,inj,den,hen = np.loadtxt(path+'u_bal.txt',unpack=True)
 	t1,enphi,denphi,nlphi1,nlphi2 = np.loadtxt(path+'phi_bal.txt',unpack=True)
 	t2,efk,e1,e2 = np.loadtxt(path+'misc.txt',unpack=True)
+	t3,m1,m2,m3,m4 = np.loadtxt(path+'moments.txt',unpack=True)
 
 	if rand==3:
         	inj = inj/2. # RANDOM FORCING
@@ -97,6 +96,20 @@ for jj,runname in enumerate(runnames):
                 plt.semilogy(t1,nlphi2,'--r',label='omega*phi')
                 plt.semilogy(t1,nlphi1,'-.b',label='phi^3')
                 plt.semilogy(t1,denphi,'-g',label='Diss')
+
+                plt.figure(5)
+                plt.title(runname)
+                plt.plot(t3,m1,'-k',label='m1')
+                plt.plot(t3,m2,'--r',label='m2')
+                plt.plot(t3,m3,'-.b',label='m3')
+                plt.plot(t3,m4,'-g',label='m4')
+
+                plt.figure(6)
+                plt.title(runname)
+                plt.semilogy(t3,m1,'-k',label='m1')
+                plt.semilogy(t3,m2,'--r',label='m2')
+                plt.semilogy(t3,m3,'-.b',label='m3')
+                plt.semilogy(t3,m4,'-g',label='m4')
 
 
 	else:

@@ -29,69 +29,56 @@ if rand==3:
 	inj = inj/2. # RANDOM FORCING
 
 # Averaging injection
-injtot = np.mean(inj) + np.mean(injz)
+inj = np.mean(inj)
 
 # nu,kf
-nu = float(params[10])
-hnu = float(params[11])
-nn = float(params[12])
-mm = float(params[13])
+nu = float(params[11])
+hnu = float(params[12])
+nn = float(params[13])
+mm = float(params[14])
 kdn = float(params[8])
-kup = float(params[9])
+kup = float(params[10])
 kf = (kdn+kup)/2.
 
-# mu
-mu = float(params[14])
-cphi = float(params[15])
-dphi = float(params[16])
-fphi = float(params[22])
+# nuv, etc
+nuv = float(params[15])
+hnuv = float(params[16])
+nnv = float(params[17])
+mmv = float(params[18])
 
 # Plots
 plt.figure(1)
 plt.title(runname)
-plt.plot(en,'-k',label='E')
+plt.plot(en,'--r',label=r'$E_{2D}$')
+plt.plot(enz,'--g',label=r'$E_{z}$')
+plt.plot(en+enz,'-k',label=r'$E_{tot}$')
 	
 plt.figure(2)
 plt.title(runname)
-plt.plot(hen,'-k',label = 'Hypo')
+plt.plot(hdiss,'--r',label = 'Hypo_2D')
+plt.plot(hdissz,'--g',label = 'Hypo_z')
+plt.plot(hdiss+hdissz,'-k',label = 'Hypo')
 
-plt.figure(3)
-plt.title(runname)
-plt.plot(enphi,'-k',label = 'enphi')
-
-plt.figure(4)
-plt.title(runname)
-plt.semilogy(enphi,'-k',label = 'enphi')
-
-mufk = np.mean(efk)
+mufk = np.mean(uf)
 print('run: %s, mean ufk: %.3e' % (runname,mufk))		
-print('run: %s, mean inj: %f4' % (runname,injtot))
+print('run: %s, mean inj: %f4' % (runname,inj))
 Re_rms=np.sqrt(mufk)/(nu*(kf)**(2*nn-1))
 print('run: %s, Re_rms: %f4' % (runname,Re_rms))
 	
+mufk = np.mean(ufz)
+print('run: %s, mean ufz: %.3e' % (runname,mufk))
+print('run: %s, mean inz: %f4' % (runname,np.mean(injz)))
+Re_rms=np.sqrt(mufk)/(nuv*(kf)**(2*nnv-1))
+print('run: %s, Re_rms_z: %f4' % (runname,Re_rms))
+
+
 plt.figure(1)
 plt.xlabel("Output #")
-plt.ylabel(r"$E_{tot}$")
 plt.legend()
 plt.tight_layout()
 
 plt.figure(2)
 plt.xlabel("Output #")
-plt.ylabel("Hypovisc")
-#plt.ylim(0,1.0)
-plt.legend()
-plt.tight_layout()
-
-plt.figure(3)
-plt.xlabel("Output #")
-plt.ylabel(r"$|\phi|^2$")
-#plt.ylim(0,1.0)
-plt.legend()
-plt.tight_layout()
-
-plt.figure(4)
-plt.xlabel("Output #")
-plt.ylabel(r"$|\phi|^2$")
 #plt.ylim(0,1.0)
 plt.legend()
 plt.tight_layout()
@@ -100,6 +87,9 @@ plt.show()
 
 start = input('Enter x-axis value you want to start averaging: ')
 start_fl = start/float(sstep/cstep)        #starting flux and spectra number
+print('Error for hypodiss')
+bunch_err.bunch_err(hdiss[start:])
+err_ind=input('Enter iteration number for error calc: ')
 
-np.savetxt('rundat/AvgTime'+runname+'.txt',[start,start_fl], delimiter ='   ')
+np.savetxt('rundat/AvgTime'+runname+'.txt',[start,start_fl,err_ind], delimiter ='   ')
 

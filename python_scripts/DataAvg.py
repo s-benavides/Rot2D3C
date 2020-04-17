@@ -5,12 +5,13 @@ import pickle
 import glob as glob
 import string
 from datetime import date
+import bunch_err
 
 # Making rule for reading nui,nun,mu
 rule = string.maketrans('d', '0')
 
 # Get all the AvgTimeO*B*.txt files
-avglist = sorted(glob.glob('rundat/AvgTimemu*.txt'))
+avglist = sorted(glob.glob('rundat/AvgTimeO*.txt'))
 
 runnames = []
 for file in avglist:
@@ -26,7 +27,7 @@ for i,run in enumerate(runnames):
 
 	params = np.genfromtxt(path+'parameter.inp',comments='%',converters={0:  lambda val: float(val.translate(rule))},usecols=0)
 
-        rand= params[18]
+        rand= params[21]
 
 	sstep = params[3]
 
@@ -37,6 +38,7 @@ for i,run in enumerate(runnames):
         t,en,inj,den,hen = np.loadtxt(path+'u_bal.txt',unpack=True)
         t1,enphi,denphi,nlphi1,nlphi2 = np.loadtxt(path+'phi_bal.txt',unpack=True)
         t2,efk,e1,e2 = np.loadtxt(path+'misc.txt',unpack=True)
+	t3,m1,m2,m3,m4 = np.loadtxt(path+'moments.txt',unpack=True)
 
         if rand==3:
                 inj = inj/2. # RANDOM FORCING
@@ -60,20 +62,29 @@ for i,run in enumerate(runnames):
         fphi = float(params[22])
 
 	# Average start indices
-	[start,start_fl] = np.loadtxt('rundat/AvgTime'+run+'.txt')
+	[start,start_fl,err_ind] = np.loadtxt('rundat/AvgTime'+run+'.txt')
 
 	start = int(start)
 	start_fl = int(start)
+	start_moms = int(start_moms)
+	start_moms_fl = int(start_moms_fl)
+	err_ind = int(err_ind)
+	err_ind_moms = int(err_ind_moms)
 
 	# list of observables to average:
-	olist = {'en':en,'inj':inj,'den':den,'hen':hen,'enphi':enphi,'denphi':denphi,'nlphi1':nlphi1,'nlphi2':nlphi2,'efk':efk,'e1':e1,'e2':e2}
+	olist = {'en':en,'inj':inj,'den':den,'hen':hen,'enphi':enphi,'denphi':denphi,'nlphi1':nlphi1,'nlphi2':nlphi2,'efk':efk,'e1':e1,'e2':e2,'m1':m1,'m2':m2,'m3':m3,'m4':m4}
 	
         # AVERAGING
 	Data_E = dict([])
 	for obs in olist:
-		avg = np.nanmean(olist[obs][start:])
-		err = np.std(olist[obs][start:])/np.sqrt(len(olist[obs][start:]))
-		Data_E[obs]=[avg,err]
+		if obs in ['m1','m2','m3','m4']:
+			avg = np.nanmean(olist[obs][start_moms:])
+			err = bunch_err.bunch_err(olist[obs][start_moms:],err_ind=err_ind)
+                        Data_E[obs]=[avg,err]
+		else:
+			avg = np.nanmean(olist[obs][start:])
+			err = bunch_err.bunch_err(olist[obs][start:],err_ind=err_ind)
+			Data_E[obs]=[avg,err]
 
         # Some calculations
 #        Re_rms=np.sqrt(avg_ufk)/(nu*(kf)**(2*hek-1))

@@ -27,12 +27,12 @@ NY = reso
 shape = (NX,NY)
 
 tf = np.loadtxt('../'+runname+'/run/time_field.txt')
-print("Last output: %s" % int(tf[0]))
+print("Last output: %s" % int(tf[-1][0]))
 
 outnum = raw_input("out num? ") #sys.argv[1]
 outnum ="{:0>3s}".format(outnum)
 
-otypes = ['ww','phi']#raw_input("out type? ") #str(sys.argv[2])
+otypes = ['ww','vz']#raw_input("out type? ") #str(sys.argv[2])
 
 # Reads binary files
 #psi = np.fromfile(path+'ps.'+outnum+'.out',dtype=np.float32).reshape(shape,order='F')
@@ -46,7 +46,8 @@ for otype in otypes:
        		#print(shape(data1))
         out = np.reshape(data,(reso,reso)) #Finally reshapes into a reso x reso array.
 
-	outs[otype] = out
+	outs[otype] = abs(out)
+	#outs[otype] = out
 
 	omax = np.max(out)
 	omin = np.min(out)
@@ -57,8 +58,10 @@ for otype in otypes:
 for otype in otypes:
 	datbar = datbars[otype]
 	plt.figure()
-	plt.imshow(outs[otype],vmin = -datbar,vmax = datbar,cmap='bwr')
-	plt.title(runname+' '+otype+' out = '+str(outnum))
+	#plt.imshow(outs[otype],vmin = -datbar,vmax = datbar,cmap='bwr')
+	plt.imshow(outs[otype],vmin = 0,vmax = datbar,cmap='copper')
+	plt.title(runname+r' $|\phi|$ out = '+str(outnum))
+	#plt.title(runname+' '+otype+' out = '+str(outnum))
 	plt.colorbar()
 	plt.xlabel('x')
 	plt.ylabel('y')
