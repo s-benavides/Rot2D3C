@@ -439,15 +439,10 @@
 !###############################
 
 !*****************************************************************
-      SUBROUTINE cond_check(ps,phi,fp,time,nn,nu,mm,hnu,cphi,dphi,fphi,kup)
+      SUBROUTINE cond_check(ps,vz,fp,fz,time,nn,nu,mm,hnu,nnv,nuv,mmv,hnuv,kup,omega)
 !-----------------------------------------------------------------
 !
-! Consistency check for the conservation of energy in HD 2D
-!
-! Parameters
-!     a  : streamfunction
-!     b  : external force
-!     t  : time
+! Condition check for the conservation of energy etc in HD 2D
 !
       USE kes
       USE grid
@@ -456,33 +451,54 @@
 
       IMPLICIT NONE
 
-      DOUBLE COMPLEX, DIMENSION(n,ista:iend) ::ps,phi,fp
+      DOUBLE COMPLEX, DIMENSION(n,ista:iend) ::ps,vz,fp,fz
       DOUBLE COMPLEX, DIMENSION(n,ista:iend) ::C1,C2,C3
-      DOUBLE PRECISION    :: Em1,Ep0,Ep1,Ep2,Ep3,Ep4
+      DOUBLE PRECISION    :: Ep1,Ep2,Epv,Eph
       DOUBLE PRECISION    :: U1, U2, U3, U4,Ek1,Ek2
-      DOUBLE PRECISION    :: Dsp,Hds,Dspw,Hdsw,DspPhi
-      DOUBLE PRECISION    :: injp1,injp2
-      DOUBLE PRECISION    :: m1,m2,m3,m4
-      DOUBLE PRECISION    :: nu,hnu,cphi,dphi,phi1,phi2,fphi
+      DOUBLE PRECISION    :: Dsp,Hds,Dspw,Hdsw
+      DOUBLE PRECISION    :: Dspv,Hdsv,Dsph,Hdsh
+      DOUBLE PRECISION    :: injp1,injp2,injz,injh1,injh2
+      DOUBLE PRECISION    :: omega,coup
+      DOUBLE PRECISION    :: nu,hnu,nuv,hnuv
       DOUBLE PRECISION    :: Efk, Efp, kup, kmn
       DOUBLE PRECISION    :: tmq,tmp,tmp0,tmp1,tmp2,tmp3,tmp4,two,time
-      INTEGER :: i,j,nn,mm
+      INTEGER :: i,j,nn,mm,nnv,mmv
 
 
-      ! psi budget
-      CALL energy(ps,Ep0,0)  ! |psi|^2
-      CALL energy(ps,Ep1,1)  ! |u|^2
-      CALL energy(ps,Ep2,2)  ! |w|^2
-      !CALL energy(ps,Ep3,3)  ! |curl(w)|^2 ?
-
+!! ENERGY
+!       Horizontal 
+      CALL energy(ps,Ep1,1)        ! |u|^2
       CALL inerprod(ps,fp,1,injp1) ! energy injection
-      CALL inerprod(ps,fp,2,injp2) ! enstrophy injection
+      CALL energy(ps,Dsp,nn+1)     ! Dissipation 
+      CALL energy(ps,Hds,1-mm)
 
-      CALL energy(ps,Dsp,nn+1)
+!       vz
+      CALL energy(vz,Epv,0)  ! |vz|^2
+      CALL inerprod(vz,fv,0,injz) ! energy injection
+      CALL energy(vz,Dspv,nnv)     ! Dissipation
+      CALL energy(vz,Hdsv,-mmv)
+
+!       extra: rotation coupling
+      CALL derivk2(ps,C1,2)   ! vx
+      CALL inerprod(vz,C1,0,coup)   ! coupling term
+
+!! ENSTROPHY
+      CALL energy(ps,Ep2,2)  ! |w|^2
+      CALL inerprod(ps,fp,2,injp2) ! enstrophy injection
+      CALL energy(ps,Dspw,nn+2)
+      CALL energy(ps,Hdsw,2-mm)
+
+!! HELICITY
+      CALL inerprod(vz,ps,1,Eph) ! -vz*omega_z
+      CALL inerprod(vz,fp,1,injh1) ! helicity injection 1
+      CALL inerprod(ps,fz,1,injh2) ! helicity injection 2
+
+
       CALL energy(ps,Hds,1-mm)
       CALL energy(ps,Dspw,nn+2)
       CALL energy(ps,Hdsw,2-mm)
-      ! Phi budget
+
+!!!!! vz budget
       CALL energy(phi,Ep4,0) ! |phi|^2
       CALL energy(phi,DspPhi,1)  !|nabla phi|^2
       ! Calculate multiplication terms:

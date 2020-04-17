@@ -375,7 +375,7 @@
          CALL const_inj(ps,kdn,kup,fp0,fp,1,seed1)
          CALL const_inj(vz,kdn,kup,fz0,fz,0,seed)  
          ELSEIF (iflow.eq.3) THEN
-         CALL CFL_condition(CFL,ps,phi,cphi,dphi,nu,dt,nn)
+         CALL CFL_condition(CFL,ps,vz,nu,nn,nuv,nnv,omega,dt)
          CALL rand_force(kdn,kup,fp0,dt,seed,1,fp)
          CALL rand_force(kdn,kup,fz0,dt,seed1,0,fz)
          ENDIF ! iflow
@@ -396,7 +396,7 @@
 !           IF (myrank.eq.0) THEN
 !        print*,"DBG top RK pre CFL",ener,enerphi
 !         ENDIF
-      CALL CFL_condition(CFL,ps,phi,cphi,dphi,nu,dt,nn)
+       CALL CFL_condition(CFL,ps,vz,nu,nn,nuv,nnv,omega,dt)
 ! Every 'cstep' steps, generates external files 
 ! to check consistency and convergence. See the 
 ! cond_check subroutine for details.
