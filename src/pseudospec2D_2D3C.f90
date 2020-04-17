@@ -474,7 +474,7 @@
 
 !       vz
       CALL energy(vz,Epv,0)  ! |vz|^2
-      CALL inerprod(vz,fv,0,injz) ! energy injection
+      CALL inerprod(vz,fz,0,injz) ! energy injection
       CALL energy(vz,Dspv,nnv)     ! Dissipation
       CALL energy(vz,Hdsv,-mmv)
 
@@ -573,7 +573,7 @@
       END SUBROUTINE cond_check
 
 !*****************************************************************
-      SUBROUTINE spectrum(ps,fp,phi,ext,odir)
+      SUBROUTINE spectrum(ps,vz,ext,odir)
 !-----------------------------------------------------------------
 !
 ! Computes the energy power spectrum in 2D. 
@@ -591,8 +591,8 @@
       USE mpivars
       IMPLICIT NONE
 
-      DOUBLE PRECISION, DIMENSION(n/2+1)        :: Ek,Fk,Phik,Phiktot1,Fktot1,Ektot1
-      DOUBLE COMPLEX, DIMENSION(n,ista:iend)    :: ps,fp,phi
+      DOUBLE PRECISION, DIMENSION(n/2+1)        :: Ek,Ezk,Ezktot1,Ektot1
+      DOUBLE COMPLEX, DIMENSION(n,ista:iend)    :: ps,vz
       DOUBLE PRECISION        :: tmp,two,tmp1,tmp2,tmp3
       INTEGER     :: kin
       INTEGER     :: kmn
@@ -621,8 +621,26 @@
 
 !!!!!!! FOR DEBUGGING: spectrum of forcing !!!!!
 
+!      DO i = 1,n/2+1
+!         Fk(i) = 0.0d0
+!      END DO
+!      DO i = ista,iend
+!         two=2.0d0
+!         IF (i.eq.1) two=1.0d0
+!         DO j = 1,n
+!            kmn = int(sqrt(ka2(j,i))+.5d0)
+!            IF ((kmn.gt.0).and.(kmn.le.n/2+1)) THEN
+!               Fk(kmn) = Fk(kmn)+two*ka2(j,i)*abs(fp(j,i))**2*tmp
+!            ENDIF
+!         END DO
+!      END DO
+!      CALL MPI_REDUCE(Fk,Fktot1,n/2+1,MPI_DOUBLE_PRECISION,MPI_SUM,0, &
+!                      MPI_COMM_WORLD,ierr)
+
+!!!!!!! spectrum of vz !!!!!
+
       DO i = 1,n/2+1
-         Fk(i) = 0.0d0
+         Ezk(i) = 0.0d0
       END DO
       DO i = ista,iend
          two=2.0d0
@@ -630,29 +648,11 @@
          DO j = 1,n
             kmn = int(sqrt(ka2(j,i))+.5d0)
             IF ((kmn.gt.0).and.(kmn.le.n/2+1)) THEN
-               Fk(kmn) = Fk(kmn)+two*ka2(j,i)*abs(fp(j,i))**2*tmp
+               Ezk(kmn) = Ezk(kmn)+two*abs(vz(j,i))**2*tmp
             ENDIF
          END DO
       END DO
-      CALL MPI_REDUCE(Fk,Fktot1,n/2+1,MPI_DOUBLE_PRECISION,MPI_SUM,0, &
-                      MPI_COMM_WORLD,ierr)
-
-!!!!!!! spectrum of phi !!!!!
-
-      DO i = 1,n/2+1
-         Phik(i) = 0.0d0
-      END DO
-      DO i = ista,iend
-         two=2.0d0
-         IF (i.eq.1) two=1.0d0
-         DO j = 1,n
-            kmn = int(sqrt(ka2(j,i))+.5d0)
-            IF ((kmn.gt.0).and.(kmn.le.n/2+1)) THEN
-               Phik(kmn) = Phik(kmn)+two*abs(phi(j,i))**2*tmp
-            ENDIF
-         END DO
-      END DO
-      CALL MPI_REDUCE(Phik,Phiktot1,n/2+1,MPI_DOUBLE_PRECISION,MPI_SUM,0, &
+      CALL MPI_REDUCE(Ezk,Ezktot1,n/2+1,MPI_DOUBLE_PRECISION,MPI_SUM,0, &
                       MPI_COMM_WORLD,ierr)
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -661,13 +661,13 @@
          OPEN(1,file=trim(odir) // '/spectrum.' // ext // '.txt')
 !         WRITE(1,30) Q,0.0d0,0.5d0*tmp1
          do i=1,n/2+1
-         WRITE(1,30) Ektot1(i),Fktot1(i),Phiktot1(i)
+         WRITE(1,30) Ektot1(i),Ezktot1(i)
          enddo
          CLOSE(1)
       ENDIF
        
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  30    FORMAT( E24.15E3,E24.15E3,E24.15E3)
+  30    FORMAT( E24.15E3,E24.15E3)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       RETURN
       END SUBROUTINE spectrum
