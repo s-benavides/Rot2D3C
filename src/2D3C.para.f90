@@ -66,7 +66,6 @@
       DOUBLE PRECISION :: nuv,hnuv
       DOUBLE PRECISION :: phase1,phase2
       DOUBLE PRECISION :: phase3,phase4
-      DOUBLE PRECISION :: cphi,dphi,fphi
 
       INTEGER :: stat
       INTEGER :: t,o,nn,mm,nnv,mmv
@@ -445,8 +444,8 @@
             d = char(jd)
             u = char(ju)
             ext4 = th // c // d // u 
-           CALL spectrum(ps,fp,phi,ext4,odir)
-           CALL transfers(ps,ext4,odir)
+           CALL spectrum(ps,vz,ext4,odir)
+           CALL transfers(ps,vz,ext4,odir)
 
            IF (myrank.eq.0) THEN
             OPEN(1,file='time_spec.txt',position='append')
@@ -486,11 +485,11 @@
             CLOSE(1)
             DO i = ista,iend
                DO j = 1,n
-                  C1(j,i) = phi(j,i)*tmp
+                  C1(j,i) = vz(j,i)*tmp
                END DO
             END DO
             CALL fftp2d_complex_to_real(plancr,C1,R1,MPI_COMM_WORLD)
-            OPEN(1,file=trim(odir) // '/phi.' // node // '.' &
+            OPEN(1,file=trim(odir) // '/vz.' // node // '.' &
                  // c // d // u // '.out',form='unformatted')
             WRITE(1) R1
             CLOSE(1)
@@ -534,7 +533,7 @@
          DO i = ista,iend
             DO j = 1,n
                C1(j,i) = ps(j,i)
-               C2(j,i) = phi(j,i)
+               C2(j,i) = vz(j,i)
             END DO
          END DO
 
@@ -550,17 +549,16 @@
 !!!!!!!!!!!!!! iflow2!!!!! Change the forcing to keep constant energy
        IF (iflow.eq.2) THEN
                seed1 = seed+1
-               CALL const_inj(C1,kdn,kup,fp0,fp,seed1)
+                 CALL const_inj(C1,kdn,kup,fp0,fp,1,seed1)
+                 CALL const_inj(C2,kdn,kup,fz0,fz,0,seed)
        ENDIF ! iflow2
 
          CALL laplak2(C1,C4)               ! make - W_2D
          CALL poisson(C1,C4,C5)            ! -curl(u_2D x w_2D)
-         CALL pmult(C2,C2,C3)               ! makes phi^2
-         CALL pmult(C3,C2,C6)               ! makes phi^3
-        ! Normalizing w term so that |w|^2 = 1.
-         CALL energy(C1,tmp4,2) ! |w|^2
-         CALL MPI_BCAST(tmp4,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
-         CALL pmult(C4/sqrt(tmp4),C2,C3)               ! makes -phi*w
+         CALL poisson(C1,C2,C6)            ! curl(u_2D x vz)
+         ! for rotation terms:
+         CALL derivk2(C1,C3,2)             ! dpsi/dy
+         CALL derivk2(C2,C4,2)             ! dv_z/dy
 
          DO i = ista,iend
             DO j = 1,n
@@ -570,12 +568,13 @@
 
             !  ps
             tmp3 = (1.0d0 +(nu*ka2(j,i)**nn + hnu*tmp2**mm )*tmp1)
-            C1(j,i) =  ps(j,i)+((-C5(j,i))*tmp2+fp(j,i))*tmp1 
+            C1(j,i) =  ps(j,i)+((-C5(j,i)+2*omega*C4(j,i))*tmp2+fp(j,i))*tmp1 
             C1(j,i) =  C1(j,i)/tmp3
 
-            ! phi
-            C2(j,i) = phi(j,i) + (mu*C2(j,i)-cphi*C6(j,i)-fphi*C3(j,i) &
-                                        -dphi*ka2(j,i)*C2(j,i))*tmp1
+            ! vz
+            tmp3 = (1.0d0 +(nuv*ka2(j,i)**nnv + hnuv*tmp2**mmv )*tmp1)
+            C1(j,i) =  vz(j,i)+(C6(j,i)+2*omega*C3(j,i)+fz(j,i))*tmp1 
+
             ELSE  
             C1(j,i) = 0.0d0
             C2(j,i) = 0.0d0
@@ -593,7 +592,7 @@
 ! Copies the result from the auxiliary matrixes into ps, az
 
          CALL derivk2(C1,ps,0)
-         CALL derivk2(C2,phi,0)
+         CALL derivk2(C2,vz,0)
 
 !          IF (timec2.eq.cstep) THEN
 !              timec2 = 0
