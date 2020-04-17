@@ -567,7 +567,7 @@
          CLOSE(1)
          OPEN(1,file='helicity_bal.txt',position='append')
          WRITE(1,23) time,-Eph,injh1,injh2,-nu*Dsph1,-nuv*Dsph2,-hnu*Hdsh1,-hnuv*Hdsh2
-   23    FORMAT( E23.14E3,E23.14E3,E23.14E3,E23.14E3,E23.14E3 )
+   23    FORMAT( E23.14E3,E23.14E3,E23.14E3,E23.14E3,E23.14E3 ,E23.14E3,E23.14E3,E23.14E3)
          CLOSE(1)
 
       ENDIF
