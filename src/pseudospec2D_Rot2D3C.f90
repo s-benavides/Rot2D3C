@@ -460,7 +460,7 @@
       DOUBLE PRECISION    :: injp1,injp2,injz,injh1,injh2
       DOUBLE PRECISION    :: omega,coup
       DOUBLE PRECISION    :: nu,hnu,nuv,hnuv
-      DOUBLE PRECISION    :: Efk, Efp, kup, kmn
+      DOUBLE PRECISION    :: Efk, Efp, kup, kmn, Efpz
       DOUBLE PRECISION    :: tmq,tmp,tmp0,tmp1,tmp2,tmp3,tmp4,two,time
       INTEGER :: i,j,nn,mm,nnv,mmv
 
@@ -544,10 +544,13 @@
          DO j = 1,n
             IF ((ka2(j,i).le.(2.01)*kup*kup).and.(ka2(j,i).ge.kup*kup )) THEN
                tmp1 = tmp1+two*ka2(j,i)*abs(ps(j,i))**2*tmp
+               tmp2 = tmp2+two*abs(vz(j,i))**2*tmp
             ENDIF
          END DO
       END DO
       CALL MPI_REDUCE(tmp1,Efp,1,MPI_DOUBLE_PRECISION,MPI_SUM,0, &
+                      MPI_COMM_WORLD,ierr)
+      CALL MPI_REDUCE(tmp2,Efpz,1,MPI_DOUBLE_PRECISION,MPI_SUM,0, &
                       MPI_COMM_WORLD,ierr)
 
 !
@@ -555,8 +558,8 @@
 !
       IF (myrank.eq.0) THEN
          OPEN(1,file='energy_bal.txt',position='append')
-         WRITE(1,20) time,Ep1,Epv,injp1,injz,nu*Dsp,nuv*Dspv,hnu*Hds,hnuv*Hdsv,2*omega*coup
-   20    FORMAT(E23.14E3,E23.14E3,E23.14E3,E23.14E3,E23.14E3,E23.14E3,E23.14E3,E23.14E3,E23.14E3,E23.14E3 )
+         WRITE(1,20) time,Ep1,Epv,injp1,injz,nu*Dsp,nuv*Dspv,hnu*Hds,hnuv*Hdsv,2*omega*coup,Efp,Efpz
+   20    FORMAT(E23.14E3,E23.14E3,E23.14E3,E23.14E3,E23.14E3,E23.14E3,E23.14E3,E23.14E3,E23.14E3,E23.14E3, E23.14E3, E23.14E3)
          CLOSE(1)
          OPEN(1,file='enstrophy_bal.txt',position='append')
          WRITE(1,22) time,Ep2,injp2,nu*Dspw,hnu*Hdsw
