@@ -407,11 +407,12 @@
 !         ENDIF
           IF (timec.eq.cstep) THEN   
               timec = 0
-              CALL cond_check(ps,phi,fp,time,nn,nu,mm,hnu,cphi,dphi,fphi,kup)
+              CALL cond_check(ps,vz,fp,fz,time,nn,nu,mm,hnu,nnv,nuv,mmv,hnuv,kup,omega)
           ENDIF
 
           IF (iflow.eq.3) THEN
-          CALL rand_force(kdn,kup,fp0,dt,seed,fp)
+           CALL rand_force(kdn,kup,fp0,dt,seed,1,fp)
+           CALL rand_force(kdn,kup,fz0,dt,seed1,0,fz)
           ENDIF ! iflow3 
 !         CALL energy(ps,ener,1)
 !         CALL energy(phi,enerphi,0)
