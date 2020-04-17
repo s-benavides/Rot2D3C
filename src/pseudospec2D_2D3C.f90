@@ -673,7 +673,7 @@
       END SUBROUTINE spectrum
 
 !*****************************************************************
-      SUBROUTINE transfers(ps,ext,odir)
+      SUBROUTINE transfers(ps,vz,ext,odir)
 !-----------------------------------------------------------------
 !
 ! Computes the energy power spectrum in 2D. 
@@ -692,8 +692,8 @@
       IMPLICIT NONE
 
       DOUBLE PRECISION, DIMENSION(n/2+1)        :: Fl
-      DOUBLE PRECISION, DIMENSION(n/2+1)        :: Fl0,Fl1
-      DOUBLE COMPLEX, DIMENSION(n,ista:iend)    :: ps
+      DOUBLE PRECISION, DIMENSION(n/2+1)        :: Fl0,Fl1,Fl2
+      DOUBLE COMPLEX, DIMENSION(n,ista:iend)    :: ps,vz
       DOUBLE COMPLEX, DIMENSION(n,ista:iend)    :: c1,c2
       DOUBLE PRECISION        :: tmp,two,tmp1,fx0,fx1
       INTEGER     :: kin
@@ -710,8 +710,9 @@
             END DO
          END DO
 
-         CALL laplak2(ps,c1)               ! make - W_2D
-         CALL poisson(ps,c1,c2)            ! - curl(u_2D x w_2D)
+         CALL laplak2(ps,c1)               ! make - W_z
+         CALL poisson(ps,c1,c2)            ! - curl(u x W_z) = [psi,W_z]
+         CALL poisson(ps,vz,c1)            ! [psi,vz]
 
 !!!!!!!!!!!!!!!!!!!!!!!!    Enstrophy flux 
       DO i = 1,n/2+1
@@ -729,7 +730,7 @@
       END DO
       CALL MPI_REDUCE(Fl,Fl0,n/2+1,MPI_DOUBLE_PRECISION,MPI_SUM,0, &
                       MPI_COMM_WORLD,ierr)
-!!!!!!!!!!!!!!!!!!!!!!!!    Energy flux 
+!!!!!!!!!!!!!!!!!!!!!!!!    Energy flux: u_2D
       DO i = 1,n/2+1
          Fl(i) = 0.0d0
       END DO
@@ -746,6 +747,23 @@
       CALL MPI_REDUCE(Fl,Fl1,n/2+1,MPI_DOUBLE_PRECISION,MPI_SUM,0, &
                       MPI_COMM_WORLD,ierr)
 
+!!!!!!!!!!!!!!!!!!!!!!!!    Energy flux: v_z
+      DO i = 1,n/2+1
+         Fl(i) = 0.0d0
+      END DO
+      DO i = ista,iend
+         two=2.0d0
+         IF (i.eq.1) two=1.0d0
+         DO j = 1,n
+            kmn = int(sqrt(ka2(j,i))+.5d0)
+            IF ((kmn.gt.0).and.(kmn.le.n/2+1)) THEN
+            Fl(kmn) = Fl(kmn)+two*dble(vz(j,i)*conjg(c1(j,i)))*tmp
+            ENDIF
+         END DO
+      END DO
+      CALL MPI_REDUCE(Fl,Fl2,n/2+1,MPI_DOUBLE_PRECISION,MPI_SUM,0, &
+                      MPI_COMM_WORLD,ierr)
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       
       IF (myrank.eq.0) THEN
@@ -753,19 +771,20 @@
          fx1=0.0d0
          OPEN(1,file=trim(odir) // '/transfer.' // ext // '.txt')
          do i=1,n/2+1
-         WRITE(1,40) Fl0(i), Fl1(i)
+         WRITE(1,40) Fl0(i), Fl1(i), Fl2(i)
          enddo
          CLOSE(1)
          OPEN(1,file=trim(odir) // '/fluxes.' // ext // '.txt')
          do i=1,n/2+1
          fx0=Fl0(i)+fx0
          fx1=Fl1(i)+fx1
-         WRITE(1,40) fx0, fx1
+         fx2=Fl2(i)+fx2
+         WRITE(1,40) fx0, fx1, fx2
          enddo
          CLOSE(1)
       ENDIF
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  40    FORMAT( E24.15E3, E24.15E3 )
+  40    FORMAT( E24.15E3, E24.15E3, E24.15E3 )
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       RETURN
       END SUBROUTINE transfers
