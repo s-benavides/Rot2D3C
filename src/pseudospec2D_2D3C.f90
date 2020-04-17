@@ -452,11 +452,11 @@
       IMPLICIT NONE
 
       DOUBLE COMPLEX, DIMENSION(n,ista:iend) ::ps,vz,fp,fz
-      DOUBLE COMPLEX, DIMENSION(n,ista:iend) ::C1,C2,C3
+      DOUBLE COMPLEX, DIMENSION(n,ista:iend) ::C1
       DOUBLE PRECISION    :: Ep1,Ep2,Epv,Eph
-      DOUBLE PRECISION    :: U1, U2, U3, U4,Ek1,Ek2
+      DOUBLE PRECISION    :: Ek1,Ek2
       DOUBLE PRECISION    :: Dsp,Hds,Dspw,Hdsw
-      DOUBLE PRECISION    :: Dspv,Hdsv,Dsph,Hdsh
+      DOUBLE PRECISION    :: Dspv,Hdsv,Dsph1,Hdsh1,Dsph2,Hdsh2
       DOUBLE PRECISION    :: injp1,injp2,injz,injh1,injh2
       DOUBLE PRECISION    :: omega,coup
       DOUBLE PRECISION    :: nu,hnu,nuv,hnuv
@@ -489,36 +489,14 @@
       CALL energy(ps,Hdsw,2-mm)
 
 !! HELICITY
-      CALL inerprod(vz,ps,1,Eph) ! -vz*omega_z
+      CALL inerprod(vz,ps,1,Eph) ! -vz*W_z
       CALL inerprod(vz,fp,1,injh1) ! helicity injection 1
       CALL inerprod(ps,fz,1,injh2) ! helicity injection 2
+      CALL inerprod(vz,ps,nn+1,Dsph1) ! helicity dissipation 1: vz *nabla^2*nn (nabla^2 psi)
+      CALL inerprod(vz,ps,1-mm,Hdsh1) ! helicity hypodissipation 1: vz 
+      CALL inerprod(ps,vz,nnv+1,Dsph2) ! helicity dissipation 2
+      CALL inerprod(ps,vz,1-mmv,Hdsh2) ! helicity hypodissipation 2
 
-
-      CALL energy(ps,Hds,1-mm)
-      CALL energy(ps,Dspw,nn+2)
-      CALL energy(ps,Hdsw,2-mm)
-
-!!!!! vz budget
-      CALL energy(phi,Ep4,0) ! |phi|^2
-      CALL energy(phi,DspPhi,1)  !|nabla phi|^2
-      ! Calculate multiplication terms:
-      CALL pmult(phi,phi,C1) !phi^2
-      CALL pmult(C1,phi,C2)  !phi^3
-      CALL laplak2(ps,C1)   ! make - W_2D
-      ! normalizing omega so that it's magnitude is one.
-      CALL energy(ps,tmp4,2) ! |w|^2
-      CALL MPI_BCAST(tmp4,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
-      CALL pmult(phi,C1/sqrt(tmp4),C3)  ! -w*phi
-       
-      CALL inerprod(phi,C2,0,phi1) ! <phi,phi^3>
-      CALL inerprod(phi,C3,0,phi2) ! <phi,-phi*w>
-
-
-!! MOMENT CALCULATIONS
-      CALL mom_calc(phi,m1,1)
-      CALL mom_calc(phi,m2,2)
-      CALL mom_calc(phi,m3,3)
-      CALL mom_calc(phi,m4,4)
 
 !!!!!!!!!!! Computes the energy at largest scale!!!!!!!!!!!!!!
       tmp = 1.0d0/dble(n)**4
@@ -576,25 +554,17 @@
 ! Creates external files to store the results
 !
       IF (myrank.eq.0) THEN
-         OPEN(1,file='phi_bal.txt',position='append')
-         WRITE(1,20) time,Ep4,dphi*DspPhi,cphi*phi1,-fphi*phi2
-   20    FORMAT(E23.14E3,E23.14E3,E23.14E3,E23.14E3,E23.14E3 )
+         OPEN(1,file='energy_bal.txt',position='append')
+         WRITE(1,20) time,Ep1,Epv,injp1,injz,nu*Dsp,nuv*Dspv,hnu*Hds,hnuv*Hdsv,2*omega*coup
+   20    FORMAT(E23.14E3,E23.14E3,E23.14E3,E23.14E3,E23.14E3,E23.14E3,E23.14E3,E23.14E3,E23.14E3,E23.14E3 )
          CLOSE(1)
-         OPEN(1,file='u_bal.txt',position='append')
-         WRITE(1,22) time,Ep1,injp1,nu*Dsp,hnu*Hds
+         OPEN(1,file='enstrophy_bal.txt',position='append')
+         WRITE(1,22) time,Ep2,injp2,nu*Dspw,hnu*Hdsw
    22    FORMAT( E23.14E3,E23.14E3,E23.14E3,E23.14E3,E23.14E3 ) 
          CLOSE(1)
-         OPEN(1,file='enst_bal.txt',position='append')
-         WRITE(1,23) time,Ep2,injp2,nu*Dspw,hnu*Hdsw
+         OPEN(1,file='helicity_bal.txt',position='append')
+         WRITE(1,23) time,-Ephi,injh1,injh2,-nu*Dsph1,-nuv*Dsph2,-hnu*Hdsh1,-hnuv*Hdsh2
    23    FORMAT( E23.14E3,E23.14E3,E23.14E3,E23.14E3,E23.14E3 )
-         CLOSE(1)
-         OPEN(1,file='misc.txt',position='append')
-         WRITE(1,24) time,Efp,Ek1,Ek2
-   24    FORMAT( E23.14E3,E23.14E3,E23.14E3,E23.14E3 )
-         CLOSE(1)
-         OPEN(1,file='moments.txt',position='append')
-         WRITE(1,25) time,m1,m2,m3,m4
-   25    FORMAT( E23.14E3,E23.14E3,E23.14E3,E23.14E3,E23.14E3 )
          CLOSE(1)
 
       ENDIF
