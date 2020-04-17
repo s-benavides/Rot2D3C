@@ -7,19 +7,19 @@
   1.00d0              % 7  fz0, vertical velocity forcing amplitude
   0.010d0             % 8  u0, streamfunction ic amplitude
   0.010d0             % 9  v0, vertical velocity ic amplitude
-  8.0d0               % 10 kdn, lowest forced wavenumber
-  8.0d0               % 11 kup, forcing wavenumber
-  0.000750d0          % 12 nu 0.001 for 256
+  12.0d0               % 10 kdn, lowest forced wavenumber
+  12.0d0               % 11 kup, forcing wavenumber
+  0.0010d0          % 12 nu 0.001 for 256
   1.00000d0           % 13 hnu 0.5 (hypo visc)
   1                   % 14 nn, order of dissipation
   2                   % 15 mm, order of hypo-dissipation
-  0.000750d0          % 16 nuv, viscosity for vz 0.001 for 256
+  0.0010d0          % 16 nuv, viscosity for vz 0.001 for 256
   1.00000d0           % 17 hnuv 0.5 (hypo visc)
   1                   % 18 nnv, order of dissipation
   2                   % 19 mmv, order of hypo-dissipation
   0.00d0              % 20 omega (rotation)
   1                   % 21 seed
-  1                   % 22 iflow (1 = random phase, 2 = const inj, 3 = random forcing)
+  3                   % 22 iflow (1 = random phase, 2 = const inj, 3 = random forcing)
   1.000d0             % 23 prm1
   1.000d0             % 24 prm2
   0.0000d0            % 25 dt_corr
