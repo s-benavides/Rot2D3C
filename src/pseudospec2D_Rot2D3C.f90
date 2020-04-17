@@ -419,6 +419,7 @@
 
       tmp = 0.0d0
       tmq = 1./dble(n)**4
+      IF (kin.ge.0) THEN
          DO i = ista,iend
             two = 2
             if (i.eq.1) two = 1 
@@ -429,6 +430,18 @@
             ENDIF
             END DO
          END DO
+       ELSE
+         DO i = ista,iend
+            two = 2
+            if (i.eq.1) two = 1
+            DO j = 1,n
+            IF ((ka2(j,i).le.kmax).and.(ka2(j,i).ge.tiny)) THEN
+!            IF ((ka2(j,i).le.kmax)) THEN
+            tmp = tmp+two*(ka2(j,i)**kin)*dble(b(j,i)*conjg(a(j,i)))*tmq
+            ENDIF
+            END DO
+         END DO
+       ENDIF
       CALL MPI_REDUCE(tmp,rslt,1,MPI_DOUBLE_PRECISION,MPI_SUM,0, &
                       MPI_COMM_WORLD,ierr)
       CALL MPI_BCAST(rslt,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)  
