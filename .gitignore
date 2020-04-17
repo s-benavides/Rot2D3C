@@ -26,7 +26,7 @@ src/*.Z
 src/*.elc
 src/*.ln
 src/core
-bin/2D3C*
+bin/Rot2D3C*
 
 # Added by Santi
 test_run/
