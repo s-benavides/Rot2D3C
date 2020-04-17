@@ -579,7 +579,7 @@
    22    FORMAT( E23.14E3,E23.14E3,E23.14E3,E23.14E3,E23.14E3 ) 
          CLOSE(1)
          OPEN(1,file='helicity_bal.txt',position='append')
-         WRITE(1,23) time,-Eph,injh1,injh2,-nu*Dsph1,-nuv*Dsph2,-hnu*Hdsh1,-hnuv*Hdsh2
+         WRITE(1,23) time,-Eph,-injh1,-injh2,-nu*Dsph1,-nuv*Dsph2,-hnu*Hdsh1,-hnuv*Hdsh2
    23    FORMAT( E23.14E3,E23.14E3,E23.14E3,E23.14E3,E23.14E3 ,E23.14E3,E23.14E3,E23.14E3)
          CLOSE(1)
 
@@ -722,9 +722,16 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
          DO i = ista,iend
             DO j = 1,n
-               C1(j,i) = ps(j,i)
+               C1(j,i) = 0.0d0
             END DO
          END DO
+
+         DO i = ista,iend
+            DO j = 1,n
+               C2(j,i) = 0.0d0
+            END DO
+         END DO
+
 
          CALL laplak2(ps,c1)               ! make - W_z
          CALL poisson(ps,c1,c2)            ! - curl(u x W_z) = [psi,W_z]
@@ -773,7 +780,7 @@
          DO j = 1,n
             kmn = int(sqrt(ka2(j,i))+.5d0)
             IF ((kmn.gt.0).and.(kmn.le.n/2+1)) THEN
-            Fl(kmn) = Fl(kmn)+two*dble(vz(j,i)*conjg(c1(j,i)))*tmp
+            Fl(kmn) = Fl(kmn)-two*dble(vz(j,i)*conjg(c1(j,i)))*tmp
             ENDIF
          END DO
       END DO
