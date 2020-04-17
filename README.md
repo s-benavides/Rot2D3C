@@ -1,4 +1,4 @@
-# Two-dimensional, three-component (2D3C) turbulence including rotation
+# Two-dimensional, three-component turbulence including rotation (Rot2D3C)
 
 This is a two-dimensional pseudospectral code written by Pablo Mininni and modified by Santiago J. Benavides to include the out-of-plane velocity, which is coupled to the vertical vorticity with a rotation in the y-direction.
 

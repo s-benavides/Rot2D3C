@@ -1,5 +1,5 @@
 !=================================================================
-      PROGRAM 2D3C
+      PROGRAM Rot2D3C
 !=================================================================
 ! NOTATION: index 'i' is 'x' 
 !           index 'j' is 'y'
@@ -624,4 +624,4 @@
       
       DEALLOCATE( ka,ka2 )
 
-      END PROGRAM 2D3C
+      END PROGRAM Rot2D3C

@@ -563,7 +563,7 @@
    22    FORMAT( E23.14E3,E23.14E3,E23.14E3,E23.14E3,E23.14E3 ) 
          CLOSE(1)
          OPEN(1,file='helicity_bal.txt',position='append')
-         WRITE(1,23) time,-Ephi,injh1,injh2,-nu*Dsph1,-nuv*Dsph2,-hnu*Hdsh1,-hnuv*Hdsh2
+         WRITE(1,23) time,-Eph,injh1,injh2,-nu*Dsph1,-nuv*Dsph2,-hnu*Hdsh1,-hnuv*Hdsh2
    23    FORMAT( E23.14E3,E23.14E3,E23.14E3,E23.14E3,E23.14E3 )
          CLOSE(1)
 
@@ -695,7 +695,7 @@
       DOUBLE PRECISION, DIMENSION(n/2+1)        :: Fl0,Fl1,Fl2
       DOUBLE COMPLEX, DIMENSION(n,ista:iend)    :: ps,vz
       DOUBLE COMPLEX, DIMENSION(n,ista:iend)    :: c1,c2
-      DOUBLE PRECISION        :: tmp,two,tmp1,fx0,fx1
+      DOUBLE PRECISION        :: tmp,two,tmp1,fx0,fx1,fx2
       INTEGER     :: kin
       INTEGER     :: kmn
       INTEGER     :: i,j
@@ -806,7 +806,7 @@
       DOUBLE COMPLEX, DIMENSION(n,ista:iend) :: c1,c2,c3
       DOUBLE PRECISION, DIMENSION(n,jsta:jend)    :: r1,r2,r3
       INTEGER :: i,j,nn,nnv
-      DOUBLE PRECISION        :: tmp,dt,nu,nuv,omega
+      DOUBLE PRECISION        :: tmp,dt,cfl,nu,nuv,omega
       DOUBLE PRECISION        :: tmp1,tmp2,kcut,nrm,maxv
 
       kcut=(dble(n)/3.0d0)

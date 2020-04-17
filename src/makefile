@@ -40,21 +40,21 @@ pseudospec2D_inc.o:
 	$(COMP) $(IDIR) pseudospec2D_mod.$(F90EXT)
 	$(COMP) $(IDIR) pseudospec2D_inc.$(F90EXT)
 
-pseudospec2D_TurbPhi.o:
+pseudospec2D_Rot2D3C.o:
 	$(COMP) $(IDIR) pseudospec2D_mod.$(F90EXT)
-	$(COMP) $(IDIR) pseudospec2D_TurbPhi.$(F90EXT)
+	$(COMP) $(IDIR) pseudospec2D_Rot2D3C.$(F90EXT)
 
 pseudospec25D_inc.o:
 	$(COMP) $(IDIR) pseudospec25D_inc.$(F90EXT)
 
 
-TurbPhi:
+Rot2D3C:
 	@$(MAKE) modify
 	@$(MAKE) fftp2D.o
-	@$(MAKE) pseudospec2D_TurbPhi.o
-	$(COMP) $(IDIR) TurbPhi.para.$(F90EXT)
+	@$(MAKE) pseudospec2D_Rot2D3C.o
+	$(COMP) $(IDIR) Rot2D3C.para.$(F90EXT)
 	$(LINK) fftp.o fftp2D.o fftp_mod.o pseudospec2D_mod.o \
-	  pseudospec2D_TurbPhi.o TurbPhi.para.o $(LDIR) $(LMPI) $(LFFTW) -o $(BIN)/TurbPhi
+	  pseudospec2D_Rot2D3C.o Rot2D3C.para.o $(LDIR) $(LMPI) $(LFFTW) -o $(BIN)/Rot2D3C
 	@$(MAKE) undo
 
 
@@ -84,7 +84,7 @@ clean:
 	@$(MAKE) undo
 
 dist:
-	rm -f $(BIN)/TurbPhi* 
+	rm -f $(BIN)/Rot2D3C* 
 
 sclean: 
 	rm -f ../outs/spectrum.*.txt *bal.txt misc.txt ../outs/*.out ../ins/*.out ../outstransfer*.txt time_*.txt ../outs/fluxes.*.txt
