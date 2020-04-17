@@ -573,7 +573,8 @@
 
             ! vz
             tmp3 = (1.0d0 +(nuv*ka2(j,i)**nnv + hnuv*tmp2**mmv )*tmp1)
-            C1(j,i) =  vz(j,i)+(C6(j,i)+2*omega*C3(j,i)+fz(j,i))*tmp1 
+            C2(j,i) =  vz(j,i)+(C6(j,i)+2*omega*C3(j,i)+fz(j,i))*tmp1 
+            C2(j,i) =  C2(j,i)/tmp3
 
             ELSE  
             C1(j,i) = 0.0d0
@@ -594,10 +595,6 @@
          CALL derivk2(C1,ps,0)
          CALL derivk2(C2,vz,0)
 
-!          IF (timec2.eq.cstep) THEN
-!              timec2 = 0
-!              CALL test_sub(time,ps,nu,nn,dt)
-!          ENDIF
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
       END DO RK
