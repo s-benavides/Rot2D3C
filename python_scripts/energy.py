@@ -47,92 +47,81 @@ for jj,runname in enumerate(runnames):
 	print('rand = ',rand)
 
 	# Reads balance.txt
-	t,en,inj,den,hen = np.loadtxt(path+'u_bal.txt',unpack=True)
-	t1,enphi,denphi,nlphi1,nlphi2 = np.loadtxt(path+'phi_bal.txt',unpack=True)
-	t2,efk,e1,e2 = np.loadtxt(path+'misc.txt',unpack=True)
-	t3,m1,m2,m3,m4 = np.loadtxt(path+'moments.txt',unpack=True)
+	t,en,enz,inj,injz,diss,dissz,hdiss,hdissz,coup,uf,ufz = np.loadtxt(path+'energy_bal.txt',unpack=True)
 
 	if rand==3:
         	inj = inj/2. # RANDOM FORCING
+        	injz = injz/2. # RANDOM FORCING
 
 	# Averaging injection
-	injtot = np.mean(inj)
+	injtot = np.mean(inj+injz)
 
-        # nu,kf
-        nu = float(params[10])
-        hnu = float(params[11])
-        nn = float(params[12])
-        mm = float(params[13])
-        kdn = float(params[8])
-        kup = float(params[9])
-        kf = (kdn+kup)/2.
-
-        # mu
-        mu = float(params[14])
-        cphi = float(params[15])
-        dphi = float(params[16])
-        fphi = float(params[22])
+	# nu,kf
+	nu = float(params[11])
+	hnu = float(params[12])
+	nn = float(params[13])
+	mm = float(params[14])
+	kdn = float(params[8])
+	kup = float(params[10])
+	kf = (kdn+kup)/2.
+	
+	# nuv, etc
+	nuv = float(params[15])
+	hnuv = float(params[16])
+	nnv = float(params[17])
+	mmv = float(params[18])
 
 	# Plots
 	if (len(runnames)==1):
 		plt.figure(1)
 		plt.title(runname)
-		plt.plot(t,en,'-k',label='KE')
+		plt.plot(t,en,'--r',label='KE_2D')
+		plt.plot(t,enz,'--g',label='KE_z')
+		plt.plot(t,en+enz,'-k',label='KE_tot')
 		
 		plt.figure(2)
 		plt.title(runname)
-		plt.plot(t,hen,'-k',label='Hypo')
+		plt.plot(t,hdiss,'--r',label='Hypo_2D')
+		plt.plot(t,hdissz,'--g',label='Hypo_z')
+		plt.plot(t,hdiss+hdissz,'-k',label='Hypo_tot')
 
 		plt.figure(3)
 		plt.title(runname)
-		plt.plot(t1,enphi,'-k',label='E_phi')
-		plt.plot(t1,nlphi2,'--r',label='omega*phi')
-		plt.plot(t1,nlphi1,'-.b',label='phi^3')
-		plt.plot(t1,denphi,'-g',label='Diss')
+		plt.plot(t,coup,'-b',label='Coupling')
                 
                 plt.figure(4)
                 plt.title(runname)
-                plt.semilogy(t1,enphi,'-k',label='E_phi')
-                plt.semilogy(t1,nlphi2,'--r',label='omega*phi')
-                plt.semilogy(t1,nlphi1,'-.b',label='phi^3')
-                plt.semilogy(t1,denphi,'-g',label='Diss')
-
-                plt.figure(5)
-                plt.title(runname)
-                plt.plot(t3,m1,'-k',label='m1')
-                plt.plot(t3,m2,'--r',label='m2')
-                plt.plot(t3,m3,'-.b',label='m3')
-                plt.plot(t3,m4,'-g',label='m4')
-
-                plt.figure(6)
-                plt.title(runname)
-                plt.semilogy(t3,m1,'-k',label='m1')
-                plt.semilogy(t3,m2,'--r',label='m2')
-                plt.semilogy(t3,m3,'-.b',label='m3')
-                plt.semilogy(t3,m4,'-g',label='m4')
-
+                plt.plot(t,inj+injz,'-k',label='injtot')
+                plt.plot(t,inj,'--r',label='inj')
+                plt.plot(t,injz,'--g',label='injz')
 
 	else:
 		plt.figure(1)
-		plt.plot(t,en,label=runname)
+		plt.plot(t,en+enz,label=runname)
 	
 		plt.figure(2)
-		plt.plot(t,hen,label = runname)
+		plt.plot(t,hdiss+hdissz,label = runname)
 	
 		plt.figure(3)
-		plt.plot(t1,enphi,label=r"$\mu/\mu_c = %.3f$" % mus[runname],color = cm.copper(cscale(mus[runname],mus)))	
+		#plt.plot(t,coup,label=r"$\mu/\mu_c = %.3f$" % mus[runname],color = cm.copper(cscale(mus[runname],mus)))	
+		plt.plot(t,coup,label=runname)	
 
                 plt.figure(4)
-                plt.semilogy(t1,enphi,label=r"$\mu/\mu_c = %.3f$" % mus[runname],color = cm.copper(cscale(mus[runname],mus)))
+                #plt.plot(t,inj+injz,label=r"$\mu/\mu_c = %.3f$" % mus[runname],color = cm.copper(cscale(mus[runname],mus)))
+		plt.plot(t,inj+injz,label=runname)	
 
-
-	mufk = np.mean(efk)
+	mufk = np.mean(uf)
 	print('run: %s, mean ufk: %.3e' % (runname,mufk))
-		
-	print('run: %s, mean injtot: %f4' % (runname,injtot))
-	
-	Re_rms=np.sqrt(mufk/(nu*(kf)**(2*nn-1)))
+	print('run: %s, mean inj: %f4' % (runname,np.mean(inj)))
+	Re_rms=np.sqrt(mufk)/(nu*(kf)**(2*nn-1))
 	print('run: %s, Re_rms: %f4' % (runname,Re_rms))
+	
+	mufk = np.mean(ufz)
+	print('run: %s, mean ufz: %.3e' % (runname,mufk))
+	print('run: %s, mean inz: %f4' % (runname,np.mean(injz)))
+	Re_rms=np.sqrt(mufk)/(nuv*(kf)**(2*nnv-1))
+	print('run: %s, Re_rms_z: %f4' % (runname,Re_rms))
+	
 	
 plt.figure(1)
 plt.xlabel("Time")
@@ -153,19 +142,19 @@ if svfig in ['Y']: plt.savefig('./figs/Hypo_'+svname+'.png')
 plt.figure(3)
 if (len(runnames)>1):
 #	plt.title(r"$|\phi|^2$")
-	plt.ylabel(r"$\langle |\phi|^2 \rangle$")
+	plt.ylabel(r"$\langle 2 \Omega \partial_y \psi v_z \rangle$")
 plt.xlabel("Time")
 plt.legend()
 plt.tight_layout()
-if svfig in ['Y']: plt.savefig('./figs/Enphi_'+svname+'.png')
+if svfig in ['Y']: plt.savefig('./figs/Coup_'+svname+'.png')
 
 plt.figure(4)
 if (len(runnames)>1):
-	plt.ylabel(r"$\langle |\phi|^2 \rangle$")
+	plt.ylabel(r"Injection rate")
 plt.xlabel("Time")
 plt.legend()
 plt.tight_layout()
-if svfig in ['Y']: plt.savefig('./figs/Enphi_semilog_'+svname+'.png')
+if svfig in ['Y']: plt.savefig('./figs/Injection_'+svname+'.png')
 
 
 plt.show()

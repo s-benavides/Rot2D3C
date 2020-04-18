@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import string
-
+import bunch_err
 # Plots energy as a function of time
 # Assumes balance.txt is the output of an HD run
 # Execute in ipython with '%run plot_energy.py'
@@ -27,9 +27,7 @@ t,en,enz,inj,injz,diss,dissz,hdiss,hdissz,coup,uf,ufz = np.loadtxt(path+'energy_
 
 if rand==3:
 	inj = inj/2. # RANDOM FORCING
-
-# Averaging injection
-inj = np.mean(inj)
+	injz = injz/2. # RANDOM FORCING
 
 # nu,kf
 nu = float(params[11])
@@ -61,7 +59,7 @@ plt.plot(hdiss+hdissz,'-k',label = 'Hypo')
 
 mufk = np.mean(uf)
 print('run: %s, mean ufk: %.3e' % (runname,mufk))		
-print('run: %s, mean inj: %f4' % (runname,inj))
+print('run: %s, mean inj: %f4' % (runname,np.mean(inj)))
 Re_rms=np.sqrt(mufk)/(nu*(kf)**(2*nn-1))
 print('run: %s, Re_rms: %f4' % (runname,Re_rms))
 	

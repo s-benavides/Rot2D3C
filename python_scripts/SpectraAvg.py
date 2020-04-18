@@ -10,7 +10,7 @@ from datetime import date
 rule = string.maketrans('d', '0')
 
 # Get all the AvgTimeO*B*.txt files
-avglist = sorted(glob.glob('rundat/*T90*.txt'))
+avglist = sorted(glob.glob('rundat/AvgTimeO*.txt'))
 
 runnames = []
 for file in avglist:
@@ -25,19 +25,15 @@ for i,run in enumerate(runnames):
         path = '../'+run+'/outs/'
 	
 	 # Average start indices
-        [start,start_fl] = np.loadtxt('rundat/AvgTime'+run+'.txt')
+        [start,start_fl,err_ind] = np.loadtxt('rundat/AvgTime'+run+'.txt')
 
         start = int(start)
         start_fl = int(start_fl)
 
-	rinfo  = np.genfromtxt('../'+run+'/run/parameter.inp',comments='!',skip_footer=136,skip_header=15,converters={2:  lambda val: float(val.translate(rule))},usecols=2)
-
-        rand = rinfo[5]	
-
 	inds = []
-	files = sorted(glob.glob(path+'kspectrum.*.txt'))
+	files = sorted(glob.glob(path+'spectrum.*.txt'))
         for file in files:
-                num = file.split(path+'kspectrum.')[1]
+                num = file.split(path+'spectrum.')[1]
                 num = num.split('.txt')[0]
                 if (int(num)>=start_fl):
                         inds.append(num)
@@ -47,29 +43,23 @@ for i,run in enumerate(runnames):
         print('%s files to average' % numfiles)
 
 
-        # Reads flux files
-        if rand!=0:
-        	injtot = 0.5*injtot
-
-	fields = ['kspectrum','mspectrum','kspecperp','mspecperp','kspecpara','mspecpara']
-
 	# Averaging
-	for field in fields:
-        	for ii,ind in enumerate(inds):
-	        	# Load file names
-                	flux = sorted(glob.glob(path+field+'.'+str(ind)+'.txt'))[0]
-			# Load and Average File Names:
-                	if ii==0:
-                		flux_avg = np.loadtxt(flux)[:,1]/float(numfiles)
-			else:
-                		flux_avg += np.loadtxt(flux)[:,1]/float(numfiles)
-		
-		Data_E[field] = flux_avg
+        for ii,ind in enumerate(inds):
+	       	# Load file names
+               	flux = sorted(glob.glob(path+'spectrum.'+str(ind)+'.txt'))[0]
+		# Load and Average File Names:
+               	if ii==0:
+               		flux_2D_avg = np.loadtxt(flux)[:,0]/float(numfiles)
+               		flux_z_avg = np.loadtxt(flux)[:,1]/float(numfiles)
+		else:
+               		flux_2D_avg += np.loadtxt(flux)[:,0]/float(numfiles)
+               		flux_z_avg += np.loadtxt(flux)[:,1]/float(numfiles)
 	
-	Data_E['ks'] = np.loadtxt(flux)[:,0]
+	Data_E['E_2D'] = flux_2D_avg
+	Data_E['E_z'] = flux_z_avg
         Data[run] = Data_E
 
 # Saving data:
 print "Saving Data"
-name = 'rundat/SpectraAvg_'+str(date.today())+'.p'
+name = 'rundat/Rot2D3C_SpectraAvg_'+str(date.today())+'.p'
 pickle.dump(Data, open(str(name), 'wb'))
