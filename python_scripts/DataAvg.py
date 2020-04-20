@@ -94,7 +94,7 @@ for i,run in enumerate(runnames):
 	for otype in otypes:
         	out = field_calc.field_calc(run,otype,outnum,reso=reso,num_files=16)
                 mean = 0.0
-                mean = np.sum(np.abs(out)**2)/float(reso)**3
+                mean = np.sum(np.abs(out)**2)/float(reso)**2
                 Data_E[otype]=mean
 
 	Data_E['rand'] = rand
