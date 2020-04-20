@@ -10,9 +10,9 @@ import os.path
 
 # Scale for coloring:
 def cscale(tau,taus):
-    maxt = taus[max(taus, key=taus.get)]
-    mint = taus[min(taus, key=taus.get)]
-    return (tau - mint)/(maxt-mint)
+    maxt = np.sqrt(taus[max(taus, key=taus.get)])
+    mint = np.sqrt(taus[min(taus, key=taus.get)])
+    return (np.sqrt(tau) - mint)/(maxt-mint)
 
 # Making rule for reading nui,nun,mu
 rule = string.maketrans('d', '0')
@@ -91,24 +91,26 @@ for jj,runname in enumerate(runnames):
                 
                 plt.figure(4)
                 plt.title(runname)
-                plt.plot(t,inj+injz,'-k',label='injtot')
-                plt.plot(t,inj,'--r',label='inj')
-                plt.plot(t,injz,'--g',label='injz')
+                plt.plot(t,diss+dissz,'-k',label='disstot')
+                plt.plot(t,diss,'--r',label='diss')
+                plt.plot(t,dissz,'--g',label='dissz')
 
 	else:
 		plt.figure(1)
-		plt.plot(t,en+enz,label=runname)
+		plt.plot(t,en+enz,label=r"$\Omega = %.3f$" % omegas[runname],color = cm.copper(cscale(omegas[runname],omegas)))	
+		#plt.plot(t,en+enz,label=runname)
 	
 		plt.figure(2)
-		plt.plot(t,hdiss+hdissz,label = runname)
+		plt.plot(t,hdiss+hdissz,label=r"$\Omega = %.3f$" % omegas[runname],color = cm.copper(cscale(omegas[runname],omegas)))	
+		#plt.plot(t,hdiss+hdissz,label = runname)
 	
 		plt.figure(3)
-		#plt.plot(t,coup,label=r"$\mu/\mu_c = %.3f$" % mus[runname],color = cm.copper(cscale(mus[runname],mus)))	
-		plt.plot(t,coup,label=runname)	
+		plt.plot(t,coup,label=r"$\Omega = %.3f$" % omegas[runname],color = cm.copper(cscale(omegas[runname],omegas)))	
+		#plt.plot(t,coup,label=runname)	
 
                 plt.figure(4)
-                #plt.plot(t,inj+injz,label=r"$\mu/\mu_c = %.3f$" % mus[runname],color = cm.copper(cscale(mus[runname],mus)))
-		plt.plot(t,inj+injz,label=runname)	
+		plt.plot(t,diss+dissz,label=r"$\Omega = %.3f$" % omegas[runname],color = cm.copper(cscale(omegas[runname],omegas)))	
+		#plt.plot(t,inj+injz,label=runname)	
 
 	mufk = np.mean(uf)
 	print('run: %s, mean ufk: %.3e' % (runname,mufk))
@@ -150,11 +152,11 @@ if svfig in ['Y']: plt.savefig('./figs/Coup_'+svname+'.png')
 
 plt.figure(4)
 if (len(runnames)>1):
-	plt.ylabel(r"Injection rate")
+	plt.ylabel(r"Viscous Dissipation")
 plt.xlabel("Time")
 plt.legend()
 plt.tight_layout()
-if svfig in ['Y']: plt.savefig('./figs/Injection_'+svname+'.png')
+if svfig in ['Y']: plt.savefig('./figs/Diss_'+svname+'.png')
 
 
 plt.show()
