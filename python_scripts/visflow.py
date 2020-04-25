@@ -14,13 +14,13 @@ def readslice(inputfilename,nx,ny,nfile):
    f.close()
    return field
 
-num_files = 16 #input('Enter number of output files (abc.xyz.out, give highest abc+1): ')
+num_files = input('Enter number of output files (abc.xyz.out, give highest abc+1): ')
 
 # Path to the binary data
 runname = raw_input("Folder name: ")
 path = '../'+runname+'/outs/'
 
-reso = 512 #input("Resolution? :")
+reso = input("Resolution? :")
 
 # Spatial resolution
 NX = reso
@@ -33,15 +33,16 @@ print("Last output: %s" % int(tf[-1][0]))
 outnum = raw_input("out num? ") #sys.argv[1]
 outnum ="{:0>3s}".format(outnum)
 
-otypes = ['ww','vz','vx','vy']#raw_input("out type? ") #str(sys.argv[2])
-legends={'ww':r'$\omega_z$','vz':r'$v_z$','vy':r'$v_y$','vx':r'$v_x$'}
+#otypes = ['ps','ww','vz','vx','vy']#raw_input("out type? ") #str(sys.argv[2])
+otypes = ['ww','vy']#raw_input("out type? ") #str(sys.argv[2])
+legends={'ps':r'$\psi$','ww':r'$\omega_z$','vz':r'$v_z$','vy':r'$v_y$','vx':r'$v_x$'}
 
 # Reads binary files
 #psi = np.fromfile(path+'ps.'+outnum+'.out',dtype=np.float32).reshape(shape,order='F')
 outs  = dict([])
 datbars = dict([])
 for otype in otypes:
-	out = field_calc.field_calc(runname,otype,outnum,reso=512,num_files=16)
+	out = field_calc.field_calc(runname,otype,outnum,reso=reso,num_files=num_files)
 	outs[otype] = out
 
 	omax = np.max(out)
