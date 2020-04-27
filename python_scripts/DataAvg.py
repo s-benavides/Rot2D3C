@@ -47,7 +47,7 @@ for i,run in enumerate(runnames):
 	hnu = float(params[12])
 	nn = float(params[13])
 	mm = float(params[14])
-	kdn = float(params[8])
+	kdn = float(params[9])
 	kup = float(params[10])
 	kf = (kdn+kup)/2.
 	

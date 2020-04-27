@@ -85,8 +85,12 @@ plt.show()
 
 start = input('Enter x-axis value you want to start averaging: ')
 start_fl = start/float(sstep/cstep)        #starting flux and spectra number
-print('Error for hypodiss')
-bunch_err.bunch_err(hdiss[start:])
+if np.mean(hdiss)==0:
+	print('Error for energy')
+	bunch_err.bunch_err(en[start:])
+else:
+	print('Error for hypodiss')
+	bunch_err.bunch_err(hdiss[start:])
 err_ind=input('Enter iteration number for error calc: ')
 
 np.savetxt('rundat/AvgTime'+runname+'.txt',[start,start_fl,err_ind], delimiter ='   ')

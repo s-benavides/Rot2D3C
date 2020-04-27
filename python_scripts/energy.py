@@ -61,7 +61,7 @@ for jj,runname in enumerate(runnames):
 	hnu = float(params[12])
 	nn = float(params[13])
 	mm = float(params[14])
-	kdn = float(params[8])
+	kdn = float(params[9])
 	kup = float(params[10])
 	kf = (kdn+kup)/2.
 	
@@ -110,9 +110,10 @@ for jj,runname in enumerate(runnames):
 
                 plt.figure(4)
 		plt.plot(t,diss+dissz,label=r"$\Omega = %.3f$" % omegas[runname],color = cm.copper(cscale(omegas[runname],omegas)))	
-		#plt.plot(t,inj+injz,label=runname)	
+		#plt.plot(t,diss+dissz,label=runname)	
 
 	mufk = np.mean(uf)
+	print(mufk,nu,kf,nn)
 	print('run: %s, mean ufk: %.3e' % (runname,mufk))
 	print('run: %s, mean inj: %f4' % (runname,np.mean(inj)))
 	Re_rms=np.sqrt(mufk)/(nu*(kf)**(2*nn-1))
