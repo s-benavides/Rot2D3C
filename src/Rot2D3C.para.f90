@@ -374,6 +374,7 @@
          CALL const_inj(ps,kdn,kup,fp0,fp,1,seed1)
          CALL const_inj(vz,kdn,kup,fz0,fz,0,seed)  
          ELSEIF (iflow.eq.3) THEN
+         seed1 = seed+1
          CALL CFL_condition(CFL,ps,vz,nu,nn,nuv,nnv,omega,dt)
          CALL rand_force(kdn,kup,fp0,dt,seed,1,fp)
          CALL rand_force(kdn,kup,fz0,dt,seed1,0,fz)
