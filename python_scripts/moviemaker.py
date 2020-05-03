@@ -18,7 +18,8 @@ path = '../'+runname+'/outs/'
 
 # Out type (e.g. 'wz','ax','spec2D_yavg',...)
 #otype = 'kspec2D_yavg'
-otype = 'vy'
+#otype = 'ww'
+otype = 'vz'
 print("Making movie of %s for run %s" % (otype,runname))
 
 # Spatial resolution

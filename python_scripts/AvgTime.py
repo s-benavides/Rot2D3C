@@ -34,7 +34,7 @@ nu = float(params[11])
 hnu = float(params[12])
 nn = float(params[13])
 mm = float(params[14])
-kdn = float(params[8])
+kdn = float(params[9])
 kup = float(params[10])
 kf = (kdn+kup)/2.
 
@@ -43,6 +43,7 @@ nuv = float(params[15])
 hnuv = float(params[16])
 nnv = float(params[17])
 mmv = float(params[18])
+omega = float(params[19])
 
 # Plots
 plt.figure(1)
@@ -62,7 +63,8 @@ print('run: %s, mean ufk: %.3e' % (runname,mufk))
 print('run: %s, mean inj: %f4' % (runname,np.mean(inj)))
 Re_rms=np.sqrt(mufk)/(nu*(kf)**(2*nn-1))
 print('run: %s, Re_rms: %f4' % (runname,Re_rms))
-	
+print('run: %s, Ro^-1: %f4.4' % (runname,(2*omega)/(kf*mufk)))	
+
 mufk = np.mean(ufz)
 print('run: %s, mean ufz: %.3e' % (runname,mufk))
 print('run: %s, mean inz: %f4' % (runname,np.mean(injz)))

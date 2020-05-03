@@ -85,17 +85,17 @@ for i,run in enumerate(runnames):
         Re_z_rms=np.sqrt(Data_E['ufz'][0])/(nuv*(kf)**(2*nnv-1))
 
 	# Components of velocity
-        reso = 512
-	tf = np.loadtxt('../'+run+'/run/time_field.txt')
-        outnum = str(int(tf[-1][0])) #raw_input("out num? ") #sys.argv[1]
-        outnum ="{:0>3s}".format(outnum)	
-
-	otypes = ['vx','vy']
-	for otype in otypes:
-        	out = field_calc.field_calc(run,otype,outnum,reso=reso,num_files=16)
-                mean = 0.0
-                mean = np.sum(np.abs(out)**2)/float(reso)**2
-                Data_E[otype]=mean
+#        reso = 512
+#	tf = np.loadtxt('../'+run+'/run/time_field.txt')
+#        outnum = str(int(tf[-1][0])) #raw_input("out num? ") #sys.argv[1]
+#        outnum ="{:0>3s}".format(outnum)	
+#
+#	otypes = ['vx','vy']
+#	for otype in otypes:
+#        	out = field_calc.field_calc(run,otype,outnum,reso=reso,num_files=16)
+#                mean = 0.0
+#                mean = np.sum(np.abs(out)**2)/float(reso)**2
+#                Data_E[otype]=mean
 
 	Data_E['rand'] = rand
 	Data_E['Re_rms'] = Re_rms

@@ -33,10 +33,17 @@ for i in range(num):
 
 omegas = dict([])
 # For making colorbar
+om_check = []
 for jj,runname in enumerate(runnames):
   	path = '../'+runname+'/run/'
 	omega = np.genfromtxt(path+'parameter.inp',comments='%',converters={0:  lambda val: float(val.translate(rule))},usecols=0)[19]
 	omegas[runname]=omega
+	om_check.append(omega)
+
+if len(np.unique(np.array(om_check)))<len(runnames):
+	pltcolor = True
+else:	
+	pltcolor = False
 
 for jj,runname in enumerate(runnames):
   	path = '../'+runname+'/run/'
@@ -44,7 +51,6 @@ for jj,runname in enumerate(runnames):
 	params = np.genfromtxt(path+'parameter.inp',comments='%',converters={0:  lambda val: float(val.translate(rule))},usecols=0)
 
 	rand= params[21]
-	print('rand = ',rand)
 
 	# Reads balance.txt
 	t,en,enz,inj,injz,diss,dissz,hdiss,hdissz,coup,uf,ufz = np.loadtxt(path+'energy_bal.txt',unpack=True)
@@ -70,6 +76,7 @@ for jj,runname in enumerate(runnames):
 	hnuv = float(params[16])
 	nnv = float(params[17])
 	mmv = float(params[18])
+	omega = float(params[19])
 
 	# Plots
 	if (len(runnames)==1):
@@ -96,21 +103,28 @@ for jj,runname in enumerate(runnames):
                 plt.plot(t,dissz,'--g',label='dissz')
 
 	else:
-		plt.figure(1)
-		plt.plot(t,en+enz,label=r"$\Omega = %.3f$" % omegas[runname],color = cm.copper(cscale(omegas[runname],omegas)))	
-		#plt.plot(t,en+enz,label=runname)
+		if pltcolor:
+			plt.figure(1)
+			plt.plot(t,en+enz,label=runname)
+			plt.figure(2)	
+			plt.plot(t,hdiss+hdissz,label = runname)
+			plt.figure(3)	
+			plt.plot(t,coup,label=runname)	
+			plt.figure(4)	
+			plt.plot(t,diss+dissz,label=runname)	
+			
+		else:
+			plt.figure(1)	
+			plt.plot(t,en+enz,label=r"$\Omega = %.3f$" % omegas[runname],color = cm.copper(cscale(omegas[runname],omegas)))	
 	
-		plt.figure(2)
-		plt.plot(t,hdiss+hdissz,label=r"$\Omega = %.3f$" % omegas[runname],color = cm.copper(cscale(omegas[runname],omegas)))	
-		#plt.plot(t,hdiss+hdissz,label = runname)
+			plt.figure(2)
+			plt.plot(t,hdiss+hdissz,label=r"$\Omega = %.3f$" % omegas[runname],color = cm.copper(cscale(omegas[runname],omegas)))	
 	
-		plt.figure(3)
-		plt.plot(t,coup,label=r"$\Omega = %.3f$" % omegas[runname],color = cm.copper(cscale(omegas[runname],omegas)))	
-		#plt.plot(t,coup,label=runname)	
+			plt.figure(3)
+			plt.plot(t,coup,label=r"$\Omega = %.3f$" % omegas[runname],color = cm.copper(cscale(omegas[runname],omegas)))	
 
-                plt.figure(4)
-		plt.plot(t,diss+dissz,label=r"$\Omega = %.3f$" % omegas[runname],color = cm.copper(cscale(omegas[runname],omegas)))	
-		#plt.plot(t,diss+dissz,label=runname)	
+                	plt.figure(4)
+			plt.plot(t,diss+dissz,label=r"$\Omega = %.3f$" % omegas[runname],color = cm.copper(cscale(omegas[runname],omegas)))	
 
 	mufk = np.mean(uf)
 	print(mufk,nu,kf,nn)
@@ -118,6 +132,7 @@ for jj,runname in enumerate(runnames):
 	print('run: %s, mean inj: %f4' % (runname,np.mean(inj)))
 	Re_rms=np.sqrt(mufk)/(nu*(kf)**(2*nn-1))
 	print('run: %s, Re_rms: %f4' % (runname,Re_rms))
+	print('run: %s, Ro^-1: %f4' % (runname,(2*omega)/(kf*mufk)))
 	
 	mufk = np.mean(ufz)
 	print('run: %s, mean ufz: %.3e' % (runname,mufk))

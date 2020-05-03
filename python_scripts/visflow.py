@@ -14,13 +14,17 @@ def readslice(inputfilename,nx,ny,nfile):
    f.close()
    return field
 
-num_files = 16 #input('Enter number of output files (abc.xyz.out, give highest abc+1): ')
 
 # Path to the binary data
 runname = raw_input("Folder name: ")
 path = '../'+runname+'/outs/'
 
-reso = 512#input("Resolution? :")
+if ('kf24' in runname) or ('1024' in runname):
+	num_files = 32 #input('Enter number of output files (abc.xyz.out, give highest abc+1): ')
+	reso = 1024#input("Resolution? :")
+else:
+	num_files=16
+	reso = 512
 
 # Spatial resolution
 NX = reso
@@ -33,8 +37,8 @@ print("Last output: %s" % int(tf[-1][0]))
 outnum = raw_input("out num? ") #sys.argv[1]
 outnum ="{:0>3s}".format(outnum)
 
-otypes = ['ps','ww','vz','vx','vy']#raw_input("out type? ") #str(sys.argv[2])
-#otypes = ['ww','vy']#raw_input("out type? ") #str(sys.argv[2])
+#otypes = ['ps','ww','vz','vx','vy']
+otypes = ['ww','vy','vz']
 legends={'ps':r'$\psi$','ww':r'$\omega_z$','vz':r'$v_z$','vy':r'$v_y$','vx':r'$v_x$'}
 
 # Reads binary files
