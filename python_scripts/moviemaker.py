@@ -19,7 +19,7 @@ path = '../'+runname+'/outs/'
 # Out type (e.g. 'wz','ax','spec2D_yavg',...)
 #otype = 'kspec2D_yavg'
 #otype = 'ww'
-otype = 'vz'
+otype = 'vy'
 print("Making movie of %s for run %s" % (otype,runname))
 
 # Spatial resolution
@@ -28,7 +28,7 @@ shape = (int(N),int(N))
 num_files = 16 # Number of cores used
 
 # File path
-filelist = sorted(glob.glob(path+otype+'.001.*.out'))
+filelist = sorted(glob.glob(path+'ps.001.*.out'))
 nfiles = np.size(filelist)
 print("nfiles = %s" % nfiles)
  
@@ -39,7 +39,7 @@ writer = imageio.get_writer('./movies/'+runname+'_'+otype+'.wmv', codec='msmpeg4
 # Reads binary files
 for ii,ofile in enumerate(filelist):
 	# Reads binary files
-	ind = ofile.split(path+otype+'.001.')[1]
+	ind = ofile.split(path+'ps.001.')[1]
 	ind = ind.split('.out')[0]
 	print("Working on snapshot %s, out num %s" % (ii+1,ind))
         out = field_calc.field_calc(runname,otype,ind,reso=N,num_files=num_files)
