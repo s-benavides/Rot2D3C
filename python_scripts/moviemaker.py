@@ -28,7 +28,7 @@ shape = (int(N),int(N))
 num_files = 16 # Number of cores used
 
 # File path
-filelist = sorted(glob.glob(path+'ps.001.*.out'))
+filelist = sorted(glob.glob(path+otype+'.001.*.out'))
 nfiles = np.size(filelist)
 print("nfiles = %s" % nfiles)
  
@@ -37,10 +37,12 @@ writer = imageio.get_writer('./movies/'+runname+'_'+otype+'.wmv', codec='msmpeg4
 
 
 # Reads binary files
-for ii in range(nfiles):
-	print("Working on snapshot %s" % (ii+1))
+for ii,ofile in enumerate(filelist):
 	# Reads binary files
-        out = field_calc.field_calc(runname,otype,str("%03d" % (ii+1)),reso=N,num_files=num_files)
+	ind = ofile.split(path+otype+'.001.')[1]
+	ind = ind.split('.out')[0]
+	print("Working on snapshot %s, out num %s" % (ii+1,ind))
+        out = field_calc.field_calc(runname,otype,ind,reso=N,num_files=num_files)
 
 	datmin = np.amin(out)
 	datmax = np.amax(out)
@@ -51,7 +53,7 @@ for ii in range(nfiles):
 	cbar = plt.colorbar(im)
 	plt.xlabel('x')
 	plt.ylabel('y')
-	plt.title("%s, run %s, out # %s" % (otype,runname,ii+1))
+	plt.title("%s, run %s, out # %s" % (otype,runname,ind))
 	plt.tight_layout()
 	fig.canvas.draw()
 	img = np.fromstring(fig.canvas.tostring_rgb(), dtype=np.uint8, sep='')
