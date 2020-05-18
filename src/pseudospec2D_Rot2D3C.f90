@@ -466,12 +466,13 @@
 
       DOUBLE COMPLEX, DIMENSION(n,ista:iend) ::ps,vz,fp,fz
       DOUBLE COMPLEX, DIMENSION(n,ista:iend) ::C1
+      DOUBLE PRECISION, DIMENSION(n,jsta:jend)    :: R1
       DOUBLE PRECISION    :: Ep1,Ep2,Epv,Eph
       DOUBLE PRECISION    :: Ek1,Ek2
       DOUBLE PRECISION    :: Dsp,Hds,Dspw,Hdsw
       DOUBLE PRECISION    :: Dspv,Hdsv,Dsph1,Hdsh1,Dsph2,Hdsh2
       DOUBLE PRECISION    :: injp1,injp2,injz,injh1,injh2
-      DOUBLE PRECISION    :: omega,coup
+      DOUBLE PRECISION    :: omega,coup,maxv,minv,maxw,minw
       DOUBLE PRECISION    :: nu,hnu,nuv,hnuv
       DOUBLE PRECISION    :: Efk, Efp, kup, kmn, Efpz
       DOUBLE PRECISION    :: tmq,tmp,tmp0,tmp1,tmp2,tmp3,tmp4,two,time
@@ -566,6 +567,25 @@
       CALL MPI_REDUCE(tmp2,Efpz,1,MPI_DOUBLE_PRECISION,MPI_SUM,0, &
                       MPI_COMM_WORLD,ierr)
 
+
+!!!!!!!! COMPUTING MAX AND MIN VALUES !!!!!!!!!!!!
+!!!!! FINDING MIN/MAX vorticity
+      CALL laplak2(ps,C1)               ! make - W_2D
+      CALL fftp2d_complex_to_real(plancr,C1,R1,MPI_COMM_WORLD)
+      tmp=maxval(R1) !max vorticity
+      tmp1=minval(R1) !min vorticity
+      call MPI_REDUCE(tmp,maxw,1,MPI_DOUBLE_PRECISION,MPI_MAX,0,MPI_COMM_WORLD,ierr)
+      call MPI_REDUCE(tmp1,minw,1,MPI_DOUBLE_PRECISION,MPI_MAX,0,MPI_COMM_WORLD,ierr)
+
+!!!!! FINDING MIN/MAX vorticity
+      CALL derivk2(vz,C1,0) ! Copies vz
+      CALL fftp2d_complex_to_real(plancr,C1,R1,MPI_COMM_WORLD)
+      tmp=maxval(R1) !max vz
+      tmp1=minval(R1) !min vz
+      call MPI_REDUCE(tmp,maxv,1,MPI_DOUBLE_PRECISION,MPI_MAX,0,MPI_COMM_WORLD,ierr)
+      call MPI_REDUCE(tmp1,minv,1,MPI_DOUBLE_PRECISION,MPI_MAX,0,MPI_COMM_WORLD,ierr)
+
+
 !
 ! Creates external files to store the results
 !
@@ -582,7 +602,10 @@
          WRITE(1,23) time,-Eph,-injh1,-injh2,-nu*Dsph1,-nuv*Dsph2,-hnu*Hdsh1,-hnuv*Hdsh2
    23    FORMAT( E23.14E3,E23.14E3,E23.14E3,E23.14E3,E23.14E3 ,E23.14E3,E23.14E3,E23.14E3)
          CLOSE(1)
-
+         OPEN(1,file='max_min.txt',position='append')
+         WRITE(1,24) time,maxw,minw,maxv,minv
+   24    FORMAT( E23.14E3,E23.14E3,E23.14E3,E23.14E3,E23.14E3)
+         CLOSE(1)
       ENDIF
       
       RETURN
