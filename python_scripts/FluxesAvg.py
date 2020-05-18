@@ -10,7 +10,7 @@ from datetime import date
 rule = string.maketrans('d', '0')
 
 # Get all the AvgTimeO*B*.txt files
-avglist = sorted(glob.glob('rundat/AvgTimeO*[!_c].txt'))
+avglist = sorted(glob.glob('rundat/AvgTimeO*.txt'))
 
 runnames = []
 for file in avglist:

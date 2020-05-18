@@ -105,23 +105,23 @@ for jj,runname in enumerate(runnames):
 	else:
 		if pltcolor:
 			plt.figure(1)
-			plt.plot(t,en+enz,label=runname)
+			plt.plot(t,en,label=runname)
 			plt.figure(2)	
 			plt.plot(t,hdiss+hdissz,label = runname)
 			plt.figure(3)	
-			plt.plot(t,coup,label=runname)	
+			plt.plot(t,enz,label=runname)	
 			plt.figure(4)	
 			plt.plot(t,diss+dissz,label=runname)	
 			
 		else:
 			plt.figure(1)	
-			plt.plot(t,en+enz,label=r"$\Omega = %.3f$" % omegas[runname],color = cm.copper(cscale(omegas[runname],omegas)))	
+			plt.plot(t,en,label=r"$\Omega = %.3f$" % omegas[runname],color = cm.copper(cscale(omegas[runname],omegas)))	
 	
 			plt.figure(2)
 			plt.plot(t,hdiss+hdissz,label=r"$\Omega = %.3f$" % omegas[runname],color = cm.copper(cscale(omegas[runname],omegas)))	
 	
 			plt.figure(3)
-			plt.plot(t,coup,label=r"$\Omega = %.3f$" % omegas[runname],color = cm.copper(cscale(omegas[runname],omegas)))	
+			plt.plot(t,enz,label=r"$\Omega = %.3f$" % omegas[runname],color = cm.copper(cscale(omegas[runname],omegas)))	
 
                 	plt.figure(4)
 			plt.plot(t,diss+dissz,label=r"$\Omega = %.3f$" % omegas[runname],color = cm.copper(cscale(omegas[runname],omegas)))	
@@ -143,7 +143,7 @@ for jj,runname in enumerate(runnames):
 	
 plt.figure(1)
 plt.xlabel("Time")
-plt.ylabel(r"$KE$")
+plt.ylabel(r"$KE_{2D}$")
 plt.legend()
 plt.tight_layout()
 if svfig in ['Y']: plt.savefig('./figs/KE_'+svname+'.png')
@@ -160,11 +160,12 @@ if svfig in ['Y']: plt.savefig('./figs/Hypo_'+svname+'.png')
 plt.figure(3)
 if (len(runnames)>1):
 #	plt.title(r"$|\phi|^2$")
-	plt.ylabel(r"$\langle 2 \Omega \partial_y \psi v_z \rangle$")
+#	plt.ylabel(r"$\langle 2 \Omega \partial_y \psi v_z \rangle$")
+	plt.ylabel(r"$KE_z$")
 plt.xlabel("Time")
 plt.legend()
 plt.tight_layout()
-if svfig in ['Y']: plt.savefig('./figs/Coup_'+svname+'.png')
+if svfig in ['Y']: plt.savefig('./figs/KEz_'+svname+'.png')
 
 plt.figure(4)
 if (len(runnames)>1):

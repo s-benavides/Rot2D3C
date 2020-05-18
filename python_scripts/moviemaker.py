@@ -20,12 +20,17 @@ path = '../'+runname+'/outs/'
 #otype = 'kspec2D_yavg'
 #otype = 'ww'
 otype = 'vy'
+#otype = 'vz'
 print("Making movie of %s for run %s" % (otype,runname))
 
 # Spatial resolution
-N = 512
+if ('kf24' or '1024') in runname:
+	N = 1024
+	num_files=32
+else:
+	N = 512
+	num_files = 16 # Number of cores used
 shape = (int(N),int(N))
-num_files = 16 # Number of cores used
 
 # File path
 filelist = sorted(glob.glob(path+'ps.001.*.out'))
