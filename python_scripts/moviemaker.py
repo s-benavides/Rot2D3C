@@ -18,18 +18,22 @@ path = '../'+runname+'/outs/'
 
 # Out type (e.g. 'wz','ax','spec2D_yavg',...)
 #otype = 'kspec2D_yavg'
-#otype = 'ww'
-otype = 'vy'
+otype = 'ww'
+#otype = 'vy'
 #otype = 'vz'
 print("Making movie of %s for run %s" % (otype,runname))
 
 # Spatial resolution
-if ('kf24' or '1024') in runname:
-	N = 1024
-	num_files=32
+if ('kf24' in runname) or ('1024' in runname):
+        num_files = 32 #input('Enter number of output files (abc.xyz.out, give highest abc+1): ')
+        N = 1024#input("Resolution? :")
+elif ('kf6' in runname) or ('256' in runname):
+        num_files = 16
+        N = 256
 else:
-	N = 512
-	num_files = 16 # Number of cores used
+        num_files=16
+        N = 512
+
 shape = (int(N),int(N))
 
 # File path

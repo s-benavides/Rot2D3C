@@ -22,6 +22,9 @@ path = '../'+runname+'/outs/'
 if ('kf24' in runname) or ('1024' in runname):
 	num_files = 32 #input('Enter number of output files (abc.xyz.out, give highest abc+1): ')
 	reso = 1024#input("Resolution? :")
+elif ('kf6' in runname) or ('256' in runname):
+	num_files = 16
+	reso = 256
 else:
 	num_files=16
 	reso = 512

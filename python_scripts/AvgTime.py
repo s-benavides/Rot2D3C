@@ -49,14 +49,16 @@ omega = float(params[19])
 plt.figure(1)
 plt.title(runname)
 plt.plot(en,'--r',label=r'$E_{2D}$')
-plt.plot(enz,'--g',label=r'$E_{z}$')
-plt.plot(en+enz,'-k',label=r'$E_{tot}$')
 	
 plt.figure(2)
 plt.title(runname)
 plt.plot(hdiss,'--r',label = 'Hypo_2D')
 plt.plot(hdissz,'--g',label = 'Hypo_z')
 plt.plot(hdiss+hdissz,'-k',label = 'Hypo')
+
+plt.figure(3)
+plt.title(runname)
+plt.plot(enz,'--g',label=r'$E_{z}$')
 
 mufk = np.mean(uf)
 print('run: %s, mean ufk: %.3e' % (runname,mufk))		
