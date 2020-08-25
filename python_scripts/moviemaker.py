@@ -1,5 +1,6 @@
 import matplotlib
 matplotlib.use('Agg')
+import pickle
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
@@ -8,6 +9,12 @@ import sys
 import imageio
 import field_calc
 #imageio.plugins.ffmpeg.download()
+
+plt.style.use('default')
+plt.rcParams.update({'font.size': 20})
+plt.rcParams["font.family"] = "serif"
+plt.rcParams["mathtext.fontset"] = "cm"
+plt.rcParams["font.serif"] = "Times New Roman"
 
 # Reads a binary file and plots a cut in the x-y plane.
 # Execute in ipython with '%run plot_bindata.py'
@@ -42,8 +49,17 @@ nfiles = np.size(filelist)
 print("nfiles = %s" % nfiles)
  
 frames_per_second = 5
-writer = imageio.get_writer('./movies/'+runname+'_'+otype+'.wmv', codec='msmpeg4',quality=10.0, fps = frames_per_second)
+writer = imageio.get_writer('./movies/'+runname+'_'+otype+'.mp4', mode="I", codec='h264',bitrate=1800000,fps = frames_per_second,quality=10.0)#output_params=['-s','1500x1500'])
+#writer = imageio.get_writer('./movies/'+runname+'_'+otype+'.wmv', codec='msmpeg4',quality=10.0, fps = frames_per_second)
 
+legend_otype = {'ww':r'$\omega$','vy':r'$v_y$','vz':r'$v_z$'}
+
+data = pickle.load(open(str('./rundat/Rot2D3C_DataAvg_2020-06-29.p'),'rb'))
+omegaz = data[runname]['omega']
+kf = data[runname]['kf']
+inj, dinj,_ = data[runname]['inj']  # we don't force the magnetic field
+uf = (5./4.)*(inj/kf)**(1./3.)
+OoRo= (2*omegaz)/(kf*uf)
 
 # Reads binary files
 for ii,ofile in enumerate(filelist):
@@ -57,12 +73,12 @@ for ii,ofile in enumerate(filelist):
 	datmax = np.amax(out)
 	datbar = max(abs(datmin),abs(datmax))
 
-	fig = plt.figure(1)
+	fig = plt.figure(1,figsize=(12,10))
 	im = plt.imshow(out,cmap=cm.bwr,vmin=-datbar,vmax=datbar)
 	cbar = plt.colorbar(im)
-	plt.xlabel('x')
-	plt.ylabel('y')
-	plt.title("%s, run %s, out # %s" % (otype,runname,ind))
+	plt.xlabel(r'$x$')
+	plt.ylabel(r'$y$')
+	plt.title("Vorticity "+legend_otype[otype]+r", $Ro^{-1} =$ %.2f, $k_f = $ %s, out # %s" % (OoRo,kf,ind))
 	plt.tight_layout()
 	fig.canvas.draw()
 	img = np.fromstring(fig.canvas.tostring_rgb(), dtype=np.uint8, sep='')

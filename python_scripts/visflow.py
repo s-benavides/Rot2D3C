@@ -55,7 +55,7 @@ for otype in otypes:
 	omax = np.max(out)
 	omin = np.min(out)
 	datbars[otype] = np.max([abs(omax),abs(omin)])
-	#datbars[otype] = 200
+	#datbars[otype] = 250
 
 # Show a horizontal cut of the field in the middle of the box
 for otype in otypes:

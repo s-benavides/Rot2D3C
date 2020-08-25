@@ -18,7 +18,10 @@ runnames = []
 for file in avglist:
   run = file.split('rundat/AvgTime')[1]
   run = run.split('.txt')[0]
-  runnames.append(run)
+  if (('seed' in run)or('_vz' in run)or('ww' in run)or('_c' in run)or('movie' in run)):
+	pass
+  else:
+	runnames.append(run)
 
 Data = dict([])
 for i,run in enumerate(runnames):
