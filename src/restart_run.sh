@@ -12,9 +12,13 @@ do
   		lastout=$value1
 		timef=$remainder
 		done < "$i/run/time_field.txt"
-	echo "Last output: "$lastout", copying to 'ins' folder"
+	echo "Last output: "$lastout", removing old files and copying new ones to 'ins' folder"
+	rm $i/ins/*.out
 	rsync -aP $i/outs/*.$lastout.out $i/ins/
 	echo "Done"
+	echo ""
+	echo "Working on : "$i    # or do whatever with individual element of the array
+	echo ""
 	echo $lastout $timef 
 	read -n 1 -p "Continue?"
 	vi $i/run/status.inp
