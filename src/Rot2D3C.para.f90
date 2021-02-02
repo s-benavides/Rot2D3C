@@ -504,6 +504,20 @@
                  // c // d // u // '.out',form='unformatted')
             WRITE(1) R1
             CLOSE(1)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Added August 26, 2020
+            !! Outputs the spatial field of large-scale dissipation
+            CALL inv_laplak2(ps,C2) ! only valid if mm=2
+            DO i = ista,iend
+               DO j = 1,n
+                  C1(j,i) = C2(j,i)*tmp
+               END DO
+            END DO
+            CALL fftp2d_complex_to_real(plancr,C1,R1,MPI_COMM_WORLD)
+            OPEN(1,file=trim(odir) // '/invlap_psi.' // node // '.' &
+                 // c // d // u // '.out',form='unformatted')
+            WRITE(1) R1
+            CLOSE(1)
+!!!!!!!!!!!!!!!!!!!!!!!!!!
            IF (myrank.eq.0) THEN
            OPEN(1,file='time_field.txt',position='append')
            WRITE(1,12) c//d//u,time
