@@ -271,72 +271,6 @@
 
       END SUBROUTINE pmult
 
-!*****************************************************************
-      SUBROUTINE mult_poisson(a,b,c)
-!-----------------------------------------------------------------
-!
-! Pointwise multiplication of a with the Poisson bracket of the scalar fields a and b 
-! in real space.
-!
-! Parameters
-!     a: input matrix
-!     b: input matrix
-!     c: a[a,b] (output)
-!
-      USE mpivars
-      USE kes
-      USE ali
-      USE grid
-      USE fft
-      IMPLICIT NONE
-
-      DOUBLE COMPLEX, DIMENSION(n,ista:iend) :: a,b,c
-      DOUBLE COMPLEX, DIMENSION(n,ista:iend) :: c1,c2,c3
-      DOUBLE PRECISION, DIMENSION(n,jsta:jend)    :: r1,r2,r3,r4
-      INTEGER :: i,j
-      DOUBLE PRECISION :: tmp
-
-      tmp = 1/dble(n)**6
-
-!
-! Computes dA/dx.dB/dy
-!
-      CALL derivk2(a,c3,0)
-      CALL fftp2d_complex_to_real(plancr,c3,r3,MPI_COMM_WORLD)
-      
-      CALL derivk2(a,c1,1)
-      CALL derivk2(b,c2,2)
-      CALL fftp2d_complex_to_real(plancr,c1,r1,MPI_COMM_WORLD)
-      CALL fftp2d_complex_to_real(plancr,c2,r2,MPI_COMM_WORLD)
-      DO j = jsta,jend
-         DO i = 1,n
-            r4(i,j) = r1(i,j)*r2(i,j)
-         END DO
-      END DO
-
-!
-! Computes dA/dy.dB/dx
-!
-      CALL derivk2(a,c1,2)
-      CALL derivk2(b,c2,1)
-      CALL fftp2d_complex_to_real(plancr,c1,r1,MPI_COMM_WORLD)
-      CALL fftp2d_complex_to_real(plancr,c2,r2,MPI_COMM_WORLD)
-      DO j = jsta,jend
-         DO i = 1,n
-            r4(i,j) = r3(i,j)*(r4(i,j)-r1(i,j)*r2(i,j))*tmp
-         END DO
-      END DO
-      CALL fftp2d_real_to_complex(planrc,r4,c,MPI_COMM_WORLD)
-      DO i = ista,iend
-         DO j = 1,n
-            IF ((ka2(j,i).ge.kmax).or.(ka2(j,i).le.tiny)) THEN
-               c(j,i) = 0.0d0
-            ENDIF
-         END DO
-      END DO
-      RETURN
-      END SUBROUTINE mult_poisson
-
 !#################################################################
 !########################   ANALYSIS   ###########################
 !#################################################################
@@ -1489,10 +1423,8 @@
              END DO
           END DO
 
-!         CALL laplak2(c2,c1)               ! make lap(chi)
-!         CALL mult_poisson(c2,c1,c1)       ! chi[chi,lap(chi)]? or + ?
          CALL laplak2(c2,c1)               ! make lap(chi)
-         CALL poisson(c2,c1,c1)            ! [chi,lap(chi)]? or + ?
+         CALL poisson(c2,c1,c1)            ! [chi,lap(chi)]
 
 !!!!!!!!!!!!!!!!!!!!!!!!    B_2 and Psi_2 
       DO i = 1,n/2+1
@@ -1505,7 +1437,7 @@
          DO j = 1,n
            kmn = int(sqrt(ka2(j,i))+.5d0)
            IF ((kmn.gt.0).and.(kmn.le.n/2+1)) THEN
-            NL = abs(c2(j,i))*c1(j,i)
+            NL = -abs(c2(j,i))*c1(j,i)
             ! Order params. Only integrate over half shell, so that
             ! it's not purely a real value.                 
             IF ((ka(j).ge.0).or.(i.gt.1)) THEN
@@ -1548,7 +1480,7 @@
 
          ! Regular 
          CALL laplak2(ps,c1)               ! make - W_z
-         CALL poisson(ps,c1,c2)            ! -curl(u_2D x w_2D)
+         CALL poisson(ps,c1,c2)            ! -curl(u_2D x w_2D) = u.grad(u)
          ! <,<
          CALL laplak2(vl,c1)               ! make - W_z
          CALL poisson(vl,c1,c3)            ! -curl(u_2D x w_2D)
@@ -1593,12 +1525,12 @@
                 kmn = int(sqrt(ka2(j,i))+.5d0)
                 IF ((kmn.gt.0).and.(kmn.le.n/2+1)) THEN
                 phik = atan2(aimag(ps(j,i)),real(ps(j,i)))
-                NL = abs(ps(j,i))*c2(j,i)
+                NL = -abs(ps(j,i))*c2(j,i)
                 ! Filtered terms
-                NLll = abs(ps(j,i))*c3(j,i)
-                NLsl = abs(ps(j,i))*c4(j,i)
-                NLls = abs(ps(j,i))*c5(j,i)
-                NLss = abs(ps(j,i))*c6(j,i)
+                NLll = -abs(ps(j,i))*c3(j,i)
+                NLsl = -abs(ps(j,i))*c4(j,i)
+                NLls = -abs(ps(j,i))*c5(j,i)
+                NLss = -abs(ps(j,i))*c6(j,i)
 
                 ! Order params. Only integrate over half shell, so that
                 ! it's not purely a real value.                 
@@ -1725,8 +1657,6 @@
              END DO
           END DO
 
-!         CALL laplak2(c2,c1)               ! make lap(chi)
-!         CALL mult_poisson(c2,c1,c1)       ! chi[chi,lap(chi)]? or + ?
          CALL laplak2(c2,c1)               ! make lap(chi)
          CALL poisson(c2,c1,c1)            ! [chi,lap(chi)]? or + ?
 
@@ -1777,8 +1707,6 @@
              END DO
           END DO
 
-!         CALL laplak2(c2,c1)               ! make lap(chi)
-!         CALL mult_poisson(c2,c1,c1)       ! chi[chi,lap(chi)]? or + ?
          CALL laplak2(c2,c1)               ! make lap(chi)
          CALL poisson(c2,c1,c1)            ! [chi,lap(chi)]? or + ?
 
