@@ -1373,6 +1373,7 @@
       double precision, dimension (:), allocatable :: kxs_k6,kys_k6,phi_k6,psi_k6
       double precision, dimension (:), allocatable :: kxs_k25,kys_k25,phi_k25,psi_k25
       double precision, dimension (:), allocatable :: psi_ll_k6,psi_sl_k6,psi_ls_k6,psi_ss_k6
+      double precision, dimension (:), allocatable :: B_ll_k6,B_sl_k6,B_ls_k6,B_ss_k6
       INTEGER       :: ic,id,iu,iif,ii6,ii25
       CHARACTER     :: c,y,u
       CHARACTER*3   :: node
@@ -1508,6 +1509,10 @@
       allocate(psi_ls_k6(CNT(6)))
       allocate(psi_sl_k6(CNT(6)))
       allocate(psi_ss_k6(CNT(6)))
+      allocate(B_ll_k6(CNT(6)))
+      allocate(B_ls_k6(CNT(6)))
+      allocate(B_sl_k6(CNT(6)))
+      allocate(B_ss_k6(CNT(6)))
       allocate(phi_k6(CNT(6)))
       allocate(kxs_k25(CNT(25)))
       allocate(kys_k25(CNT(25)))
@@ -1559,6 +1564,10 @@
                     psi_sl_k6(ii6) = atan2(aimag(NLsl),real(NLsl))
                     psi_ls_k6(ii6) = atan2(aimag(NLls),real(NLls))
                     psi_ss_k6(ii6) = atan2(aimag(NLss),real(NLss))
+                    B_ll_k6(ii6) = abs(NLll)
+                    B_sl_k6(ii6) = abs(NLsl)
+                    B_ls_k6(ii6) = abs(NLls)
+                    B_ss_k6(ii6) = abs(NLss)
                     ii6 = ii6 + 1
                   ELSEIF (kmn.eq.25) THEN 
                     kxs_k25(ii25) = ka(j)
@@ -1622,7 +1631,7 @@
       IF (size(phi_k6).gt.0) THEN
       OPEN(1,file=trim(odir)//'/ph_k6.'//node//'.'//ext//'.txt')
          do i=1,size(phi_k6)
-         WRITE(1,47) kxs_k6(i),kys_k6(i),phi_k6(i),psi_k6(i),psi_ll_k6(i),psi_sl_k6(i),psi_ls_k6(i),psi_ss_k6(i)
+         WRITE(1,47) kxs_k6(i),kys_k6(i),phi_k6(i),psi_k6(i),psi_ll_k6(i),psi_sl_k6(i),psi_ls_k6(i),psi_ss_k6(i), B_ll_k6(i),B_sl_k6(i),B_ls_k6(i),B_ss_k6(i)
          enddo
       CLOSE(1)
       ENDIF
@@ -1634,7 +1643,7 @@
       CLOSE(1)
       ENDIF
   45    FORMAT( E24.15E3 ,  E24.15E3 , E24.15E3,  E24.15E3 )
-  47    FORMAT( E24.15E3 ,  E24.15E3 , E24.15E3,  E24.15E3, E24.15E3, E24.15E3 , E24.15E3 , E24.15E3 )
+  47    FORMAT( E24.15E3 ,  E24.15E3 , E24.15E3,  E24.15E3, E24.15E3, E24.15E3 , E24.15E3 , E24.15E3, E24.15E3, E24.15E3 , E24.15E3 , E24.15E3 )
       IF (myrank.eq.0) THEN
       OPEN(1,file=trim(odir)//'/ph_f.'//ext//'.txt')
          WRITE(1,46) dble(kxfp),dble(kyfp), phasefp
