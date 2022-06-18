@@ -66,11 +66,12 @@
       DOUBLE PRECISION :: nuv,hnuv
       DOUBLE PRECISION :: phase1,phase2
       DOUBLE PRECISION :: phase3,phase4
+      DOUBLE PRECISION :: phasefp,phasefz
 
       INTEGER :: stat
       INTEGER :: t,o,nn,mm,nnv,mmv
       INTEGER :: i,j,ir,jr
-      INTEGER :: ki,kj
+      INTEGER :: ki,kj,kxfp,kyfp,kxfz,kyfz
       INTEGER :: ic,id,iu
       INTEGER :: jc,jd,ju,jt
       INTEGER :: timet,timec,times,timec2
@@ -81,6 +82,8 @@
       CHARACTER*4   :: ext4
       CHARACTER*100 :: odir
       CHARACTER*100 :: idir
+
+      LOGICAL :: restress_calc
 
 !
 ! Initializes the MPI library
@@ -160,6 +163,7 @@
          READ(1,*) dt_corr                  ! 25 
          READ(1,'(a100)') idir              ! binary input directory
          READ(1,'(a100)') odir              ! output directory
+         READ(1,*) restress_calc            ! calculate reynolds avg. and stresses?
          CLOSE(1)
 !         step = step
 !         tstep = tstep
@@ -193,6 +197,7 @@
       CALL MPI_BCAST(dt_corr,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr) !25
       CALL MPI_BCAST(idir,100,MPI_CHARACTER,0,MPI_COMM_WORLD,ierr)
       CALL MPI_BCAST(odir,100,MPI_CHARACTER,0,MPI_COMM_WORLD,ierr)
+      CALL MPI_BCAST(restress_calc,1,MPI_LOGICAL,0,MPI_COMM_WORLD,ierr)
 
 !
 ! Some numerical constants
@@ -258,8 +263,8 @@
                R2(i,j) = 0.0d0
             END DO
          END DO
-         DO ir = 1,kup+1
-         DO jr = 1,kup+1
+         DO ir = 1,int(kup)+1
+         DO jr = 1,int(kup)+1
             kr = sqrt(dble(ir*ir+jr*jr))
          phase1=randu(seed)*2.0d0 *pi
          phase2=randu(seed)*2.0d0 *pi
@@ -376,8 +381,8 @@
          ELSEIF (iflow.eq.3) THEN
          seed1 = seed+1
          CALL CFL_condition(CFL,ps,vz,nu,nn,nuv,nnv,omega,dt)
-         CALL rand_force(kdn,kup,fp0,dt,seed,1,fp)
-         CALL rand_force(kdn,kup,fz0,dt,seed1,0,fz)
+         CALL rand_force(kdn,kup,fp0,dt,seed,1,fp,phasefp,kxfp,kyfp)
+         CALL rand_force(kdn,kup,fz0,dt,seed1,0,fz,phasefz,kxfz,kyfz)
          ENDIF ! iflow
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !         CALL energy(ps,ener,1)
@@ -407,19 +412,9 @@
 !         ENDIF
           IF (timec.eq.cstep) THEN   
               timec = 0
-              CALL cond_check(ps,vz,fp,fz,time,nn,nu,mm,hnu,nnv,nuv,mmv,hnuv,kup,omega)
+              CALL cond_check(ps,vz,fp,fz,time,nn,nu,mm,hnu,nnv,nuv,mmv,hnuv,kup,omega,restress_calc)
           ENDIF
-
-          IF (iflow.eq.3) THEN
-           CALL rand_force(kdn,kup,fp0,dt,seed,1,fp)
-           CALL rand_force(kdn,kup,fz0,dt,seed1,0,fz)
-          ENDIF ! iflow3 
-!         CALL energy(ps,ener,1)
-!         CALL energy(phi,enerphi,0)
-!           IF (myrank.eq.0) THEN
-!        print*, "DBG post iflow:",ener,enerphi
-!          ENDIF
-
+         
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 ! Every 'sstep' steps, generates external files 
@@ -445,8 +440,9 @@
             d = char(jd)
             u = char(ju)
             ext4 = th // c // d // u 
-           CALL spectrum(ps,vz,ext4,odir)
-           CALL transfers(ps,vz,ext4,odir)
+           !!CALL spectrum(ps,vz,ext4,odir)
+           !!CALL transfers(ps,vz,ext4,odir)
+           CALL sync_shell(ps,fp,nu,hnu,nn,mm,phasefp,kxfp,kyfp,ext4,odir)
 
            IF (myrank.eq.0) THEN
             OPEN(1,file='time_spec.txt',position='append')
@@ -504,19 +500,76 @@
                  // c // d // u // '.out',form='unformatted')
             WRITE(1) R1
             CLOSE(1)
+!!!!!!!!!!!!!!!!!!!!!!!!!! Added May 26, 2022. Mean outputs
+             IF (restress_calc) THEN
+                ! First, mean flow
+                CALL restress_out(ps,vz,fp,fz,C1,C2,0) 
+                DO i = ista,iend
+                   DO j = 1,n
+                      C1(j,i) = C1(j,i)*tmp
+                      C2(j,i) = C2(j,i)*tmp
+                   END DO
+                END DO
+                CALL fftp2d_complex_to_real(plancr,C1,R1,MPI_COMM_WORLD)
+                CALL fftp2d_complex_to_real(plancr,C2,R2,MPI_COMM_WORLD)
+                OPEN(1,file=trim(odir) // '/psi_mean.' // node // '.' &
+                     // c // d // u // '.out',form='unformatted')
+                WRITE(1) R1
+                CLOSE(1)
+                OPEN(1,file=trim(odir) // '/vz_mean.' // node // '.' &
+                     // c // d // u // '.out',form='unformatted')
+                WRITE(1) R2
+                CLOSE(1)
+                ! Forcing
+                CALL restress_out(ps,vz,fp,fz,C1,C2,1) 
+                DO i = ista,iend
+                   DO j = 1,n
+                      C1(j,i) = C1(j,i)*tmp
+                      C2(j,i) = C2(j,i)*tmp
+                   END DO
+                END DO
+                CALL fftp2d_complex_to_real(plancr,C1,R1,MPI_COMM_WORLD)
+                CALL fftp2d_complex_to_real(plancr,C2,R2,MPI_COMM_WORLD)
+                OPEN(1,file=trim(odir) // '/fp_mean.' // node // '.' &
+                     // c // d // u // '.out',form='unformatted')
+                WRITE(1) R1
+                CLOSE(1)
+                OPEN(1,file=trim(odir) // '/fz_mean.' // node // '.' &
+                     // c // d // u // '.out',form='unformatted')
+                WRITE(1) R2
+                CLOSE(1)
+                ! Reynolds stresses
+                CALL restress_out(ps,vz,fp,fz,C1,C2,2) 
+                DO i = ista,iend
+                   DO j = 1,n
+                      C1(j,i) = C1(j,i)*tmp
+                      C2(j,i) = C2(j,i)*tmp
+                   END DO
+                END DO
+                CALL fftp2d_complex_to_real(plancr,C1,R1,MPI_COMM_WORLD)
+                CALL fftp2d_complex_to_real(plancr,C2,R2,MPI_COMM_WORLD)
+                OPEN(1,file=trim(odir) // '/NL_psi_mean.' // node // '.' &
+                     // c // d // u // '.out',form='unformatted')
+                WRITE(1) R1
+                CLOSE(1)
+                OPEN(1,file=trim(odir) // '/NL_vz_mean.' // node // '.' &
+                     // c // d // u // '.out',form='unformatted')
+                WRITE(1) R2
+                CLOSE(1)
+            ENDIF
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Added August 26, 2020
-            !! Outputs the spatial field of large-scale dissipation
-            CALL inv_laplak2(ps,C2) ! only valid if mm=2
-            DO i = ista,iend
-               DO j = 1,n
-                  C1(j,i) = C2(j,i)*tmp
-               END DO
-            END DO
-            CALL fftp2d_complex_to_real(plancr,C1,R1,MPI_COMM_WORLD)
-            OPEN(1,file=trim(odir) // '/invlap_psi.' // node // '.' &
-                 // c // d // u // '.out',form='unformatted')
-            WRITE(1) R1
-            CLOSE(1)
+!            !! Outputs the spatial field of large-scale dissipation
+!            CALL inv_laplak2(ps,C2) ! only valid if mm=2
+!            DO i = ista,iend
+!               DO j = 1,n
+!                  C1(j,i) = C2(j,i)*tmp
+!               END DO
+!            END DO
+!            CALL fftp2d_complex_to_real(plancr,C1,R1,MPI_COMM_WORLD)
+!            OPEN(1,file=trim(odir) // '/invlap_psi.' // node // '.' &
+!                 // c // d // u // '.out',form='unformatted')
+!            WRITE(1) R1
+!            CLOSE(1)
 !!!!!!!!!!!!!!!!!!!!!!!!!!
            IF (myrank.eq.0) THEN
            OPEN(1,file='time_field.txt',position='append')
@@ -528,6 +581,16 @@
            ENDIF      
 
          ENDIF
+          
+          IF (iflow.eq.3) THEN
+           CALL rand_force(kdn,kup,fp0,dt,seed,1,fp,phasefp,kxfp,kyfp)
+           CALL rand_force(kdn,kup,fz0,dt,seed1,0,fz,phasefz,kxfz,kyfz)
+          ENDIF ! iflow3 
+!         CALL energy(ps,ener,1)
+!         CALL energy(phi,enerphi,0)
+!           IF (myrank.eq.0) THEN
+!        print*, "DBG post iflow:",ener,enerphi
+!          ENDIF
 
          timet = timet+1
          times = times+1

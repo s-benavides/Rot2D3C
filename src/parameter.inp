@@ -25,3 +25,4 @@
   0.0000d0            % 25 dt_corr
 ../ins
 ../outs
+  .false.              % Restress_calc (if true, will output snapshots of z-averages)

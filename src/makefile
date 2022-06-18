@@ -7,17 +7,24 @@
 # When EXTEN is equal to 1 you can use the variable F90EXT 
 # to change the extension of the F90/95 files.
 
-COMP     = mpifort -c
-LINK     = mpifort 
+MPIPATH = /cm/shared/engaging/openmpi/2.0.3
+##FFTWPATH = /home/santiago_b/FFTW3_GHOST
+FFTWPATH = /home/santiago_b/FFTW/fftlib2
+
+COMP     = mpif90 -cpp -traditional-cpp -O3 -funroll-loops -ffree-line-length-none -x f95-cpp-input -c \
+		-I$(MPIPATH)/include/ -I$(MPIPATH)/lib/\
+		-I$(FFTWPATH)/include/ ##mpifort -c
+LINK     = mpif90 ##mpifort 
 UNDER    = 0
 EXTEN    = 0
 APPEND   = _
 F90EXT   = f90
-LMPI     = -lmpi -lm#-limf
 IDIR     = 
-LDIR     =
-FFTWLDIR = /home/santiago_b/FFTW/fftlib2/lib
-LFFTW    = -ldrfftw -ldfftw -L$(FFTWLDIR) 
+LDIR     = -lm
+LMPI     = -L$(MPIPATH)/lib/ \
+		-pthread -Wl,-rpath -Wl,$(MPIPATH)/lib -Wl,--enable-new-dtags -lmpi_usempi -lmpi_mpifh -lmpi ##-lmpi -lm#-limf
+###LFFTW    = -L$(FFTWPATH)/lib -lfftw3  
+LFFTW    = -L$(FFTWPATH)/lib -ldrfftw -ldfftw
 SHELL    = /bin/bash
 MAKE     = /usr/bin/make
 PERL     = /usr/bin/perl
