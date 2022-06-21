@@ -1564,10 +1564,10 @@
                     psi_sl_k6(ii6) = atan2(aimag(NLsl),real(NLsl))
                     psi_ls_k6(ii6) = atan2(aimag(NLls),real(NLls))
                     psi_ss_k6(ii6) = atan2(aimag(NLss),real(NLss))
-                    B_ll_k6(ii6) = abs(NLll)
-                    B_sl_k6(ii6) = abs(NLsl)
-                    B_ls_k6(ii6) = abs(NLls)
-                    B_ss_k6(ii6) = abs(NLss)
+                    B_ll_k6(ii6) = abs(NLll)*tmp
+                    B_sl_k6(ii6) = abs(NLsl)*tmp
+                    B_ls_k6(ii6) = abs(NLls)*tmp
+                    B_ss_k6(ii6) = abs(NLss)*tmp
                     ii6 = ii6 + 1
                   ELSEIF (kmn.eq.25) THEN 
                     kxs_k25(ii25) = ka(j)
